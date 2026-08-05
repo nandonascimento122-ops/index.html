@@ -1,0 +1,1941 @@
+<!DOCTYPE html>
+<html lang="pt-br" id="htmlRoot">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Converta PDFs para Word e Imagens online. Redimensione, gire e converta formatos com total privacidade. Processamento local no seu navegador.">
+    <title id="pageTitle">Conversor Universal Pro | PDF para Word e Imagens</title>
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3362553991120944" crossorigin="anonymous"></script>
+    <!-- Cloudflare Web Analytics -->
+    <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "SUBSTITUA-PELO-SEU-TOKEN"}'></script>
+    <!-- Puter.js (IA gratuita para o chat de suporte) -->
+    <script src="https://js.puter.com/v2/"></script>
+    <!-- Biblioteca de QR Code -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- Chart.js (gráficos do painel admin) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+    <!-- Bibliotecas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.min.js"></script>
+    <style>
+        body { font-family: sans-serif; background: #f4f7f6; margin: 0; padding: 20px; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: auto; background: white; padding: 2rem; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .box { margin-bottom: 20px; padding: 15px; border: 1px solid #eee; border-radius: 10px; }
+        input, select { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        button { width: 100%; padding: 14px; background: #007bff; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        nav { text-align: center; margin-bottom: 20px; }
+        nav a { margin: 0 10px; text-decoration: none; color: #007bff; font-weight: bold; }
+        h1, h2 { color: #222; }
+        #langSelect { width: auto; display: inline-block; margin: 0 0 16px; padding: 6px 10px; font-size: 13px; }
+        html[dir="rtl"] body { direction: rtl; }
+
+        /* TELA DE ASSINATURA */
+        #telaAssinaturaConversor {
+            position: fixed; inset: 0; background: #f4f7f6; z-index: 9999;
+            display: flex; align-items: center; justify-content: center; padding: 20px;
+            overflow-y: auto;
+        }
+        #telaAssinaturaConversor.oculta { display: none; }
+        .caixa-assinatura-conv { max-width: 460px; width: 100%; background: white; padding: 2rem; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; }
+        .valor-assinatura-conv { font-size: 2rem; font-weight: 700; color: #28a745; margin: 0.5rem 0; }
+        #qrcodeConversor { display: flex; justify-content: center; margin: 16px 0; min-height: 180px; align-items: center; }
+        .codigo-copia-conv { background: #f9fafb; border: 1px solid #ddd; border-radius: 8px; padding: 10px; margin: 12px 0; font-size: 12px; word-break: break-all; text-align: left; font-family: monospace; max-height: 70px; overflow-y: auto; }
+        .btn-copiar-conv { background: #28a745; margin-bottom: 16px; }
+        .passos-assinatura-conv { text-align: left; background: #f9fafb; border-radius: 8px; padding: 14px; margin-bottom: 14px; font-size: 13px; }
+        .passos-assinatura-conv div { margin-bottom: 6px; }
+        .passos-assinatura-conv b { color: #007bff; }
+        .msg-codigo-conv { font-size: 13px; min-height: 16px; margin-bottom: 10px; }
+        .msg-codigo-conv.erro { color: #dc3545; }
+        .msg-codigo-conv.sucesso { color: #28a745; }
+        .link-admin-conv { display: block; margin-top: 16px; font-size: 12px; color: #999; text-decoration: none; }
+
+        /* PAINEL ADMIN */
+        #painelAdminConversor {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 10000;
+            display: none; align-items: center; justify-content: center; padding: 20px;
+        }
+        #painelAdminConversor.aberto { display: flex; }
+        .caixa-admin-conv { max-width: 420px; width: 100%; background: white; padding: 1.5rem; border-radius: 16px; }
+        .codigo-atual-conv { background: #eff6ff; border: 2px dashed #007bff; border-radius: 10px; padding: 14px; text-align: center; font-size: 20px; font-weight: 700; color: #007bff; margin-bottom: 12px; letter-spacing: 2px; }
+    </style>
+</head>
+<body>
+
+<!-- TELA DE ASSINATURA -->
+<div id="telaAssinaturaConversor" class="oculta">
+    <div class="caixa-assinatura-conv">
+        <h1>Conversor Universal Pro</h1>
+        <p style="color:#666;">Assinatura mensal:</p>
+        <div class="valor-assinatura-conv">R$ 1,00 / mês</div>
+
+        <div id="qrcodeConversor"></div>
+        <p style="font-size:13px; color:#666;">PIX (copia e cola):</p>
+        <div id="codigoPixConversor" class="codigo-copia-conv">Carregando...</div>
+        <button class="btn-copiar-conv" onclick="copiarCodigoPixConversor()">📋 Copiar Código PIX</button>
+
+        <div class="passos-assinatura-conv">
+            <div><b>1.</b> Pague o Pix acima.</div>
+            <div><b>2.</b> Envie o comprovante por e-mail (botão abaixo).</div>
+            <div><b>3.</b> Você recebe o código de acesso por e-mail em resposta.</div>
+            <div><b>4.</b> Digite o código aqui embaixo para confirmar.</div>
+        </div>
+
+        <a id="btnEmailComprovanteConversor" href="#" style="display:block; text-decoration:none;">
+            <button style="background:#007bff;">✉️ Enviar comprovante por e-mail</button>
+        </a>
+
+        <input type="text" id="campoCodigoConversor" placeholder="CÓDIGO DE ACESSO" style="text-transform:uppercase; text-align:center;">
+        <button onclick="confirmarCodigoConversor()">Confirmar código</button>
+        <div id="msgCodigoConversor" class="msg-codigo-conv"></div>
+    </div>
+</div>
+
+<!-- PAINEL ADMIN -->
+<div id="painelAdminConversor">
+    <div class="caixa-admin-conv">
+        <h2 style="margin-bottom:12px;">🔐 Painel do Administrador</h2>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px;">
+            <div style="background:#f8fafc; border-radius:10px; padding:10px; text-align:center;">
+                <div style="font-size:12px; color:#666;">Total de visitas</div>
+                <div id="contadorTotalConversor" style="font-size:20px; font-weight:700; color:#007bff;">0</div>
+            </div>
+            <div style="background:#f8fafc; border-radius:10px; padding:10px; text-align:center;">
+                <div style="font-size:12px; color:#666;">Acessos hoje</div>
+                <div id="contadorHojeConversor" style="font-size:20px; font-weight:700; color:#007bff;">0</div>
+            </div>
+            <div style="background:#f8fafc; border-radius:10px; padding:10px; text-align:center;">
+                <div style="font-size:12px; color:#666;">Testes iniciados</div>
+                <div id="contadorTestesConversor" style="font-size:20px; font-weight:700; color:#007bff;">0</div>
+            </div>
+            <div style="background:#f8fafc; border-radius:10px; padding:10px; text-align:center;">
+                <div style="font-size:12px; color:#666;">Assinantes confirmados</div>
+                <div id="contadorPagosConversor" style="font-size:20px; font-weight:700; color:#007bff;">0</div>
+            </div>
+        </div>
+
+        <div style="background:#f8fafc; border-radius:10px; padding:12px; margin-bottom:16px;">
+            <canvas id="graficoAdminConversor" height="160"></canvas>
+        </div>
+
+        <p style="font-size:13px; color:#666; margin-bottom:10px;">Código de acesso válido — envie por e-mail só pra quem confirmou o pagamento:</p>
+        <div id="codigoAtualExibidoConversor" class="codigo-atual-conv">—</div>
+        <input type="text" id="novoCodigoInputConversor" placeholder="NOVO CÓDIGO" style="text-transform:uppercase; text-align:center;">
+        <button onclick="salvarNovoCodigoConversor()">Salvar código</button>
+        <button style="background:#ccc; color:#333; margin-top:10px;" onclick="fecharAdminConversor()">Fechar</button>
+    </div>
+</div>
+
+
+<div class="container">
+    <div style="text-align:right;">
+        <select id="langSelect">
+            <option value="pt">Português</option>
+            <option value="en">English</option>
+            <option value="es">Español</option>
+            <option value="fr">Français</option>
+            <option value="de">Deutsch</option>
+            <option value="it">Italiano</option>
+            <option value="ru">Русский</option>
+            <option value="zh">中文</option>
+            <option value="ja">日本語</option>
+            <option value="ko">한국어</option>
+            <option value="ar">العربية</option>
+            <option value="hi">हिन्दी</option>
+            <option value="nl">Nederlands</option>
+            <option value="pl">Polski</option>
+            <option value="tr">Türkçe</option>
+            <option value="id">Bahasa Indonesia</option>
+            <option value="vi">Tiếng Việt</option>
+            <option value="sv">Svenska</option>
+            <option value="el">Ελληνικά</option>
+            <option value="uk">Українська</option>
+            <option value="fa">فارسی</option>
+            <option value="he">עברית</option>
+            <option value="th">ไทย</option>
+            <option value="ro">Română</option>
+            <option value="cs">Čeština</option>
+            <option value="bn">বাংলা</option>
+            <option value="fil">Filipino</option>
+        </select>
+    </div>
+    <nav>
+        <a href="#" onclick="showTab('converter')" data-i18n="nav_tool">Ferramenta</a>
+        <a href="#" onclick="showTab('qrcode-tab')">QR Code</a>
+        <a href="#" onclick="showTab('info')" data-i18n="nav_info">Sobre & FAQ</a>
+        <a href="#" onclick="showTab('privacy')" data-i18n="nav_privacy">Privacidade</a>
+        <a href="#" onclick="showTab('info'); setTimeout(()=>document.getElementById('secaoServicosUteis').scrollIntoView({behavior:'smooth'}), 50);" style="color:#17a2b8;">🔗 Serviços</a>
+    </nav>
+
+    <!-- FERRAMENTA -->
+    <div id="converter" class="tab-content active">
+        <h1 data-i18n="h1">Conversor Universal Pro</h1>
+        <div class="box">
+            <label data-i18n="lbl_select_file">1. Selecione o arquivo:</label>
+            <input type="file" id="fileInput" accept="image/*, application/pdf">
+        </div>
+        <div class="box">
+            <label data-i18n="lbl_camera">📷 Ou digitalize um documento com a câmera:</label>
+            <input type="file" id="cameraInput" accept="image/*" capture="environment">
+            <label style="display:flex; align-items:center; gap:8px; font-weight:normal; margin-bottom:0;">
+                <input type="checkbox" id="enhanceScan" checked style="width:auto; margin:0;">
+                <span data-i18n="chk_scanner">Aplicar efeito scanner (preto e branco, mais contraste)</span>
+            </label>
+        </div>
+        <div class="box">
+            <label data-i18n="lbl_action">2. Ação:</label>
+            <select id="actionSelect">
+                <option value="word" data-i18n="opt_word">PDF/Foto para Word (.docx)</option>
+                <option value="image" data-i18n="opt_image">Converter Imagem/PDF (PNG/JPG/WebP)</option>
+            </select>
+            <div id="ocrSettings" style="display:block;">
+                <label style="font-weight:normal; margin-bottom:6px;" data-i18n="lbl_ocr_lang">Idioma do texto (para OCR de fotos/scans):</label>
+                <select id="ocrLang">
+                    <option value="por">Português</option>
+                    <option value="eng">English</option>
+                    <option value="spa">Español</option>
+                    <option value="fra">Français</option>
+                    <option value="deu">Deutsch</option>
+                    <option value="ita">Italiano</option>
+                    <option value="rus">Русский</option>
+                    <option value="chi_sim">中文</option>
+                    <option value="jpn">日本語</option>
+                    <option value="kor">한국어</option>
+                    <option value="ara">العربية</option>
+                    <option value="hin">हिन्दी</option>
+                    <option value="nld">Nederlands</option>
+                    <option value="pol">Polski</option>
+                    <option value="tur">Türkçe</option>
+                    <option value="ind">Bahasa Indonesia</option>
+                    <option value="vie">Tiếng Việt</option>
+                    <option value="swe">Svenska</option>
+                    <option value="ell">Ελληνικά</option>
+                    <option value="ukr">Українська</option>
+                    <option value="fas">فارسی</option>
+                    <option value="heb">עברית</option>
+                    <option value="tha">ไทย</option>
+                    <option value="ron">Română</option>
+                    <option value="ces">Čeština</option>
+                    <option value="ben">বাংলা</option>
+                    <option value="fil">Filipino</option>
+                </select>
+            </div>
+            <div id="imageSettings" style="display:none;">
+                <input type="number" id="width" data-i18n-placeholder="lbl_width" placeholder="Largura (px)">
+                <input type="number" id="height" data-i18n-placeholder="lbl_height" placeholder="Altura (px)">
+                <input type="number" id="angle" value="0" data-i18n-placeholder="lbl_angle" placeholder="Girar (graus)">
+                <select id="fmt"><option value="png">PNG</option><option value="jpeg">JPG</option><option value="webp">WebP</option></select>
+            </div>
+        </div>
+        <button id="execBtn" data-i18n="btn_process">Processar e Baixar</button>
+        <button id="btnImprimir" style="background:#6c757d; margin-top:10px;">🖨️ Imprimir arquivo</button>
+        <a href="#" class="link-admin-conv" onclick="abrirAdminConversor(event)" style="text-align:center;">admin</a>
+        <div id="status" style="margin-top:15px; text-align:center; font-style:italic;"></div>
+
+        <!-- ===================================================== -->
+        <!-- ESPAÇO DO ANÚNCIO (Google AdSense)                     -->
+        <!-- ===================================================== -->
+        <ins class="adsbygoogle"
+             style="display:block; margin-top:20px;"
+             data-ad-client="ca-pub-3362553991120944"
+             data-ad-slot="7574588868"
+             data-ad-format="autorelaxed"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+
+    <!-- GERADOR DE QR CODE -->
+    <div id="qrcode-tab" class="tab-content">
+        <h1>📱 Gerador de QR Code</h1>
+        <p style="color:#666; margin-top:-10px;">Crie QR Codes grátis, sem cadastro. Tudo gerado no seu navegador — nenhum dado é enviado a servidores.</p>
+
+        <div class="box">
+            <label>1. O que o QR Code deve abrir?</label>
+            <select id="tipoConteudo">
+                <option value="texto">Texto / Link</option>
+                <option value="wifi">Rede Wi-Fi</option>
+                <option value="whatsapp">WhatsApp</option>
+            </select>
+
+            <div id="campoTexto">
+                <input type="text" id="inputTexto" placeholder="https://exemplo.com ou qualquer texto">
+            </div>
+
+            <div id="campoWifi" style="display:none;">
+                <input type="text" id="wifiNome" placeholder="Nome da rede (SSID)">
+                <input type="text" id="wifiSenha" placeholder="Senha">
+                <select id="wifiTipo">
+                    <option value="WPA">WPA/WPA2</option>
+                    <option value="WEP">WEP</option>
+                    <option value="nopass">Sem senha</option>
+                </select>
+            </div>
+
+            <div id="campoWhatsapp" style="display:none;">
+                <input type="text" id="whatsappNumero" placeholder="Número com DDI e DDD (ex: 5511999999999)">
+                <input type="text" id="whatsappMensagem" placeholder="Mensagem pré-definida (opcional)">
+            </div>
+        </div>
+
+        <div class="box">
+            <label>2. Tamanho:</label>
+            <select id="tamanhoQr">
+                <option value="200">Pequeno (200px)</option>
+                <option value="300" selected>Médio (300px)</option>
+                <option value="500">Grande (500px)</option>
+            </select>
+        </div>
+
+        <button id="gerarBtn">Gerar QR Code</button>
+
+        <div id="qrcode" style="display:flex; justify-content:center; margin:20px 0; min-height:200px; align-items:center;"></div>
+        <div id="acoesQr" style="display:none; text-align:center;">
+            <button id="baixarBtn" style="background:#28a745;">Baixar QR Code (PNG)</button>
+        </div>
+
+        <ins class="adsbygoogle"
+             style="display:block; margin-top:20px;"
+             data-ad-client="ca-pub-3362553991120944"
+             data-ad-slot="7574588868"
+             data-ad-format="autorelaxed"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+
+    <!-- SOBRE E FAQ -->
+    <div id="info" class="tab-content">
+        <h2 data-i18n="faq_title">Perguntas Frequentes (FAQ)</h2>
+        <p><strong data-i18n="faq_q1">Como funciona?</strong> <span data-i18n="faq_a1">Tudo é processado localmente no seu computador. Seus arquivos não são enviados para nenhum servidor.</span></p>
+        <p><strong data-i18n="faq_q2">É pago?</strong> <span data-i18n="faq_a2">Não, oferecemos estas ferramentas gratuitamente.</span></p>
+        <h2 data-i18n="about_title">Sobre o Projeto</h2>
+        <p data-i18n="about_text">Desenvolvido por estudantes de ADS para facilitar a conversão de documentos.</p>
+
+        <div id="secaoServicosUteis" style="background:linear-gradient(135deg,#eef7ff,#e6f9fb); border:2px solid #17a2b8; border-radius:14px; padding:18px; margin-top:24px;">
+            <h2 style="margin-top:0; font-size:1.3rem;">🔗 Serviços Úteis</h2>
+            <p style="color:#555; font-size:14px;">
+                Não existe um catálogo único de "todos os serviços públicos do mundo" (cada país tem o seu, sem um portal global) —
+                mas pro Brasil, o <strong>gov.br</strong> já reúne mais de 4 mil serviços federais num só lugar, então ele resolve praticamente tudo.
+            </p>
+            <div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:14px;">
+                <a href="https://www.gov.br/pt-br" target="_blank" rel="noopener" style="flex:1; min-width:150px; text-align:center; background:#1351B4; color:white; padding:16px; border-radius:10px; text-decoration:none; font-weight:bold; font-size:16px;">🇧🇷 gov.br (Portal Federal)</a>
+                <a href="https://www.gov.br/inss" target="_blank" rel="noopener" style="flex:1; min-width:150px; text-align:center; background:#1351B4; color:white; padding:16px; border-radius:10px; text-decoration:none; font-weight:bold; font-size:16px;">👴 INSS</a>
+                <a href="https://www.gov.br/receitafederal" target="_blank" rel="noopener" style="flex:1; min-width:150px; text-align:center; background:#1351B4; color:white; padding:16px; border-radius:10px; text-decoration:none; font-weight:bold; font-size:16px;">📄 Receita Federal</a>
+            </div>
+            <p style="color:#555; font-size:14px;">Serviços do Rio Grande do Norte:</p>
+            <div style="display:flex; gap:12px; flex-wrap:wrap;">
+                <a href="https://www.neoenergia.com/web/rn/segunda-via-de-conta" target="_blank" rel="noopener" style="flex:1; min-width:150px; text-align:center; background:#007bff; color:white; padding:16px; border-radius:10px; text-decoration:none; font-weight:bold; font-size:16px; box-shadow:0 4px 10px rgba(0,123,255,0.3);">⚡ COSERN (Luz)</a>
+                <a href="https://agencia.caern.com.br/#/contas" target="_blank" rel="noopener" style="flex:1; min-width:150px; text-align:center; background:#17a2b8; color:white; padding:16px; border-radius:10px; text-decoration:none; font-weight:bold; font-size:16px; box-shadow:0 4px 10px rgba(23,162,184,0.3);">💧 CAERN (Água)</a>
+                <a href="https://www.detran.rn.gov.br" target="_blank" rel="noopener" style="flex:1; min-width:150px; text-align:center; background:#6c757d; color:white; padding:16px; border-radius:10px; text-decoration:none; font-weight:bold; font-size:16px;">🚗 DETRAN-RN</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- PRIVACIDADE -->
+    <div id="privacy" class="tab-content">
+        <h2 data-i18n="privacy_title">Política de Privacidade</h2>
+        <p data-i18n="privacy_text">Este site respeita sua privacidade. Não coletamos ou armazenamos seus arquivos. Utilizamos anúncios do Google AdSense, que podem coletar dados básicos de navegação (cookies) para exibir anúncios relevantes.</p>
+    </div>
+</div>
+
+<div style="text-align:center; padding:16px; font-size:13px; color:#888;">
+    🎁 3 dias de teste grátis, depois <strong>R$ 1,00/mês</strong> para uso completo.
+</div>
+
+<script>
+/* ================================================================ */
+/* Traduções                                                         */
+/* ================================================================ */
+const TRANSLATIONS = {
+  pt: {
+    title: "Conversor Universal Pro | PDF para Word e Imagens",
+    nav_tool: "Ferramenta", nav_info: "Sobre & FAQ", nav_privacy: "Privacidade",
+    h1: "Conversor Universal Pro",
+    lbl_select_file: "1. Selecione o arquivo:",
+    lbl_camera: "📷 Ou digitalize um documento com a câmera:",
+    chk_scanner: "Aplicar efeito scanner (preto e branco, mais contraste)",
+    lbl_action: "2. Ação:",
+    opt_word: "PDF/Foto para Word (.docx)",
+    opt_image: "Converter Imagem/PDF (PNG/JPG/WebP)",
+    lbl_ocr_lang: "Idioma do texto (para OCR de fotos/scans):",
+    lbl_width: "Largura (px)", lbl_height: "Altura (px)", lbl_angle: "Girar (graus)",
+    btn_process: "Processar e Baixar",
+    faq_title: "Perguntas Frequentes (FAQ)",
+    faq_q1: "Como funciona?", faq_a1: "Tudo é processado localmente no seu computador. Seus arquivos não são enviados para nenhum servidor.",
+    faq_q2: "É pago?", faq_a2: "Não, oferecemos estas ferramentas gratuitamente.",
+    about_title: "Sobre o Projeto", about_text: "Desenvolvido por estudantes de ADS para facilitar a conversão de documentos.",
+    privacy_title: "Política de Privacidade",
+    privacy_text: "Este site respeita sua privacidade. Não coletamos ou armazenamos seus arquivos. Utilizamos anúncios do Google AdSense, que podem coletar dados básicos de navegação (cookies) para exibir anúncios relevantes.",
+    msg_select_file_alert: "Selecione um arquivo!",
+    msg_processing: "⏳ Processando...",
+    msg_success: "✅ Sucesso!",
+    msg_error_prefix: "❌ Erro: ",
+    msg_word_lib_missing: "A biblioteca de geração de Word não carregou (verifique sua conexão ou bloqueador de anúncios) — veja o console (F12) para detalhes.",
+    msg_select_pdf_or_image: "Selecione um arquivo PDF ou uma imagem para converter para Word.",
+    msg_no_text_found: "Não foi possível reconhecer nenhum texto neste arquivo. Tente uma foto mais nítida e bem iluminada.",
+    msg_generating_word: "⏳ Gerando arquivo Word...",
+    msg_scanning: "⏳ Processando digitalização...",
+    msg_scan_success: "✅ Documento digitalizado! Escolha a ação e clique em 'Processar e Baixar'.",
+    msg_scan_error_prefix: "❌ Erro ao digitalizar: ",
+    msg_ocr_preparing: "⏳ Preparando OCR...",
+    msg_ocr_page: "⏳ OCR na página {i} de {n}...",
+  },
+  en: {
+    title: "Universal Converter Pro | PDF to Word and Images",
+    nav_tool: "Tool", nav_info: "About & FAQ", nav_privacy: "Privacy",
+    h1: "Universal Converter Pro",
+    lbl_select_file: "1. Select the file:",
+    lbl_camera: "📷 Or scan a document with your camera:",
+    chk_scanner: "Apply scanner effect (black & white, more contrast)",
+    lbl_action: "2. Action:",
+    opt_word: "PDF/Photo to Word (.docx)",
+    opt_image: "Convert Image/PDF (PNG/JPG/WebP)",
+    lbl_ocr_lang: "Text language (for OCR of photos/scans):",
+    lbl_width: "Width (px)", lbl_height: "Height (px)", lbl_angle: "Rotate (degrees)",
+    btn_process: "Process and Download",
+    faq_title: "Frequently Asked Questions (FAQ)",
+    faq_q1: "How does it work?", faq_a1: "Everything is processed locally on your computer. Your files are never sent to any server.",
+    faq_q2: "Is it paid?", faq_a2: "No, these tools are offered for free.",
+    about_title: "About the Project", about_text: "Developed to make document conversion easier.",
+    privacy_title: "Privacy Policy",
+    privacy_text: "This site respects your privacy. We do not collect or store your files. We use Google AdSense ads, which may collect basic browsing data (cookies) to show relevant ads.",
+    msg_select_file_alert: "Select a file!",
+    msg_processing: "⏳ Processing...",
+    msg_success: "✅ Success!",
+    msg_error_prefix: "❌ Error: ",
+    msg_word_lib_missing: "The Word generation library failed to load (check your connection or ad blocker) — see the console (F12) for details.",
+    msg_select_pdf_or_image: "Select a PDF file or an image to convert to Word.",
+    msg_no_text_found: "Could not recognize any text in this file. Try a sharper, better-lit photo.",
+    msg_generating_word: "⏳ Generating Word file...",
+    msg_scanning: "⏳ Processing scan...",
+    msg_scan_success: "✅ Document scanned! Choose the action and click 'Process and Download'.",
+    msg_scan_error_prefix: "❌ Error scanning: ",
+    msg_ocr_preparing: "⏳ Preparing OCR...",
+    msg_ocr_page: "⏳ OCR on page {i} of {n}...",
+  },
+  es: {
+    title: "Conversor Universal Pro | PDF a Word e Imágenes",
+    nav_tool: "Herramienta", nav_info: "Acerca & FAQ", nav_privacy: "Privacidad",
+    h1: "Conversor Universal Pro",
+    lbl_select_file: "1. Selecciona el archivo:",
+    lbl_camera: "📷 O digitaliza un documento con la cámara:",
+    chk_scanner: "Aplicar efecto escáner (blanco y negro, más contraste)",
+    lbl_action: "2. Acción:",
+    opt_word: "PDF/Foto a Word (.docx)",
+    opt_image: "Convertir Imagen/PDF (PNG/JPG/WebP)",
+    lbl_ocr_lang: "Idioma del texto (para OCR de fotos/escaneos):",
+    lbl_width: "Ancho (px)", lbl_height: "Alto (px)", lbl_angle: "Girar (grados)",
+    btn_process: "Procesar y Descargar",
+    faq_title: "Preguntas Frecuentes (FAQ)",
+    faq_q1: "¿Cómo funciona?", faq_a1: "Todo se procesa localmente en tu ordenador. Tus archivos nunca se envían a ningún servidor.",
+    faq_q2: "¿Es de pago?", faq_a2: "No, estas herramientas se ofrecen gratis.",
+    about_title: "Sobre el Proyecto", about_text: "Desarrollado para facilitar la conversión de documentos.",
+    privacy_title: "Política de Privacidad",
+    privacy_text: "Este sitio respeta tu privacidad. No recopilamos ni almacenamos tus archivos. Usamos anuncios de Google AdSense, que pueden recopilar datos básicos de navegación (cookies) para mostrar anuncios relevantes.",
+    msg_select_file_alert: "¡Selecciona un archivo!",
+    msg_processing: "⏳ Procesando...",
+    msg_success: "✅ ¡Éxito!",
+    msg_error_prefix: "❌ Error: ",
+    msg_word_lib_missing: "No se pudo cargar la librería de generación de Word (revisa tu conexión o bloqueador de anuncios) — ver consola (F12) para más detalles.",
+    msg_select_pdf_or_image: "Selecciona un archivo PDF o una imagen para convertir a Word.",
+    msg_no_text_found: "No se pudo reconocer ningún texto en este archivo. Prueba con una foto más nítida y bien iluminada.",
+    msg_generating_word: "⏳ Generando archivo Word...",
+    msg_scanning: "⏳ Procesando digitalización...",
+    msg_scan_success: "✅ ¡Documento digitalizado! Elige la acción y haz clic en 'Procesar y Descargar'.",
+    msg_scan_error_prefix: "❌ Error al digitalizar: ",
+    msg_ocr_preparing: "⏳ Preparando OCR...",
+    msg_ocr_page: "⏳ OCR en la página {i} de {n}...",
+  },
+  fr: {
+    title: "Convertisseur Universel Pro | PDF vers Word et Images",
+    nav_tool: "Outil", nav_info: "À propos & FAQ", nav_privacy: "Confidentialité",
+    h1: "Convertisseur Universel Pro",
+    lbl_select_file: "1. Sélectionnez le fichier :",
+    lbl_camera: "📷 Ou numérisez un document avec la caméra :",
+    chk_scanner: "Appliquer l'effet scanner (noir et blanc, plus de contraste)",
+    lbl_action: "2. Action :",
+    opt_word: "PDF/Photo vers Word (.docx)",
+    opt_image: "Convertir Image/PDF (PNG/JPG/WebP)",
+    lbl_ocr_lang: "Langue du texte (pour l'OCR des photos/scans) :",
+    lbl_width: "Largeur (px)", lbl_height: "Hauteur (px)", lbl_angle: "Rotation (degrés)",
+    btn_process: "Traiter et Télécharger",
+    faq_title: "Questions Fréquentes (FAQ)",
+    faq_q1: "Comment ça marche ?", faq_a1: "Tout est traité localement sur votre ordinateur. Vos fichiers ne sont jamais envoyés à un serveur.",
+    faq_q2: "Est-ce payant ?", faq_a2: "Non, ces outils sont proposés gratuitement.",
+    about_title: "À propos du Projet", about_text: "Développé pour faciliter la conversion de documents.",
+    privacy_title: "Politique de Confidentialité",
+    privacy_text: "Ce site respecte votre vie privée. Nous ne collectons ni ne stockons vos fichiers. Nous utilisons des annonces Google AdSense, qui peuvent collecter des données de navigation de base (cookies) pour afficher des annonces pertinentes.",
+    msg_select_file_alert: "Sélectionnez un fichier !",
+    msg_processing: "⏳ Traitement...",
+    msg_success: "✅ Succès !",
+    msg_error_prefix: "❌ Erreur : ",
+    msg_word_lib_missing: "La bibliothèque de génération Word n'a pas pu se charger (vérifiez votre connexion ou bloqueur de publicités) — voir la console (F12) pour plus de détails.",
+    msg_select_pdf_or_image: "Sélectionnez un fichier PDF ou une image à convertir en Word.",
+    msg_no_text_found: "Impossible de reconnaître du texte dans ce fichier. Essayez une photo plus nette et mieux éclairée.",
+    msg_generating_word: "⏳ Génération du fichier Word...",
+    msg_scanning: "⏳ Traitement de la numérisation...",
+    msg_scan_success: "✅ Document numérisé ! Choisissez l'action et cliquez sur « Traiter et Télécharger ».",
+    msg_scan_error_prefix: "❌ Erreur de numérisation : ",
+    msg_ocr_preparing: "⏳ Préparation de l'OCR...",
+    msg_ocr_page: "⏳ OCR sur la page {i} sur {n}...",
+  },
+  de: {
+    title: "Universal Konverter Pro | PDF zu Word und Bildern",
+    nav_tool: "Werkzeug", nav_info: "Über & FAQ", nav_privacy: "Datenschutz",
+    h1: "Universal Konverter Pro",
+    lbl_select_file: "1. Datei auswählen:",
+    lbl_camera: "📷 Oder scannen Sie ein Dokument mit der Kamera:",
+    chk_scanner: "Scanner-Effekt anwenden (Schwarz-Weiß, mehr Kontrast)",
+    lbl_action: "2. Aktion:",
+    opt_word: "PDF/Foto zu Word (.docx)",
+    opt_image: "Bild/PDF konvertieren (PNG/JPG/WebP)",
+    lbl_ocr_lang: "Textsprache (für OCR von Fotos/Scans):",
+    lbl_width: "Breite (px)", lbl_height: "Höhe (px)", lbl_angle: "Drehen (Grad)",
+    btn_process: "Verarbeiten und Herunterladen",
+    faq_title: "Häufig gestellte Fragen (FAQ)",
+    faq_q1: "Wie funktioniert es?", faq_a1: "Alles wird lokal auf Ihrem Computer verarbeitet. Ihre Dateien werden niemals an einen Server gesendet.",
+    faq_q2: "Ist es kostenpflichtig?", faq_a2: "Nein, diese Tools werden kostenlos angeboten.",
+    about_title: "Über das Projekt", about_text: "Entwickelt, um die Dokumentenkonvertierung zu erleichtern.",
+    privacy_title: "Datenschutzrichtlinie",
+    privacy_text: "Diese Website respektiert Ihre Privatsphäre. Wir sammeln oder speichern Ihre Dateien nicht. Wir verwenden Google AdSense-Anzeigen, die grundlegende Browserdaten (Cookies) sammeln können, um relevante Anzeigen zu schalten.",
+    msg_select_file_alert: "Wählen Sie eine Datei aus!",
+    msg_processing: "⏳ Verarbeitung...",
+    msg_success: "✅ Erfolg!",
+    msg_error_prefix: "❌ Fehler: ",
+    msg_word_lib_missing: "Die Word-Generierungsbibliothek konnte nicht geladen werden (prüfen Sie Ihre Verbindung oder den Werbeblocker) — Details in der Konsole (F12).",
+    msg_select_pdf_or_image: "Wählen Sie eine PDF-Datei oder ein Bild zum Konvertieren in Word aus.",
+    msg_no_text_found: "In dieser Datei konnte kein Text erkannt werden. Versuchen Sie ein schärferes, besser beleuchtetes Foto.",
+    msg_generating_word: "⏳ Word-Datei wird erstellt...",
+    msg_scanning: "⏳ Scan wird verarbeitet...",
+    msg_scan_success: "✅ Dokument gescannt! Wählen Sie die Aktion und klicken Sie auf „Verarbeiten und Herunterladen“.",
+    msg_scan_error_prefix: "❌ Fehler beim Scannen: ",
+    msg_ocr_preparing: "⏳ OCR wird vorbereitet...",
+    msg_ocr_page: "⏳ OCR auf Seite {i} von {n}...",
+  },
+  it: {
+    title: "Convertitore Universale Pro | PDF in Word e Immagini",
+    nav_tool: "Strumento", nav_info: "Info & FAQ", nav_privacy: "Privacy",
+    h1: "Convertitore Universale Pro",
+    lbl_select_file: "1. Seleziona il file:",
+    lbl_camera: "📷 Oppure scansiona un documento con la fotocamera:",
+    chk_scanner: "Applica effetto scanner (bianco e nero, più contrasto)",
+    lbl_action: "2. Azione:",
+    opt_word: "PDF/Foto in Word (.docx)",
+    opt_image: "Converti Immagine/PDF (PNG/JPG/WebP)",
+    lbl_ocr_lang: "Lingua del testo (per OCR di foto/scansioni):",
+    lbl_width: "Larghezza (px)", lbl_height: "Altezza (px)", lbl_angle: "Ruota (gradi)",
+    btn_process: "Elabora e Scarica",
+    faq_title: "Domande Frequenti (FAQ)",
+    faq_q1: "Come funziona?", faq_a1: "Tutto viene elaborato localmente sul tuo computer. I tuoi file non vengono mai inviati a nessun server.",
+    faq_q2: "È a pagamento?", faq_a2: "No, questi strumenti sono offerti gratuitamente.",
+    about_title: "Informazioni sul Progetto", about_text: "Sviluppato per facilitare la conversione dei documenti.",
+    privacy_title: "Informativa sulla Privacy",
+    privacy_text: "Questo sito rispetta la tua privacy. Non raccogliamo né archiviamo i tuoi file. Utilizziamo annunci Google AdSense, che possono raccogliere dati di navigazione di base (cookie) per mostrare annunci pertinenti.",
+    msg_select_file_alert: "Seleziona un file!",
+    msg_processing: "⏳ Elaborazione...",
+    msg_success: "✅ Successo!",
+    msg_error_prefix: "❌ Errore: ",
+    msg_word_lib_missing: "La libreria di generazione Word non è stata caricata (controlla la connessione o l'ad blocker) — vedi la console (F12) per i dettagli.",
+    msg_select_pdf_or_image: "Seleziona un file PDF o un'immagine da convertire in Word.",
+    msg_no_text_found: "Impossibile riconoscere testo in questo file. Prova con una foto più nitida e ben illuminata.",
+    msg_generating_word: "⏳ Generazione file Word...",
+    msg_scanning: "⏳ Elaborazione scansione...",
+    msg_scan_success: "✅ Documento scansionato! Scegli l'azione e clicca su 'Elabora e Scarica'.",
+    msg_scan_error_prefix: "❌ Errore durante la scansione: ",
+    msg_ocr_preparing: "⏳ Preparazione OCR...",
+    msg_ocr_page: "⏳ OCR sulla pagina {i} di {n}...",
+  },
+  ru: {
+    title: "Универсальный Конвертер Pro | PDF в Word и изображения",
+    nav_tool: "Инструмент", nav_info: "О сайте и FAQ", nav_privacy: "Конфиденциальность",
+    h1: "Универсальный Конвертер Pro",
+    lbl_select_file: "1. Выберите файл:",
+    lbl_camera: "📷 Или отсканируйте документ камерой:",
+    chk_scanner: "Применить эффект сканера (чёрно-белый, больше контраста)",
+    lbl_action: "2. Действие:",
+    opt_word: "PDF/Фото в Word (.docx)",
+    opt_image: "Конвертировать изображение/PDF (PNG/JPG/WebP)",
+    lbl_ocr_lang: "Язык текста (для OCR фото/сканов):",
+    lbl_width: "Ширина (px)", lbl_height: "Высота (px)", lbl_angle: "Поворот (градусы)",
+    btn_process: "Обработать и Скачать",
+    faq_title: "Часто задаваемые вопросы (FAQ)",
+    faq_q1: "Как это работает?", faq_a1: "Всё обрабатывается локально на вашем компьютере. Ваши файлы никогда не отправляются на сервер.",
+    faq_q2: "Это платно?", faq_a2: "Нет, эти инструменты предоставляются бесплатно.",
+    about_title: "О проекте", about_text: "Разработано для упрощения конвертации документов.",
+    privacy_title: "Политика конфиденциальности",
+    privacy_text: "Этот сайт уважает вашу конфиденциальность. Мы не собираем и не храним ваши файлы. Мы используем рекламу Google AdSense, которая может собирать базовые данные просмотра (файлы cookie) для показа релевантной рекламы.",
+    msg_select_file_alert: "Выберите файл!",
+    msg_processing: "⏳ Обработка...",
+    msg_success: "✅ Успешно!",
+    msg_error_prefix: "❌ Ошибка: ",
+    msg_word_lib_missing: "Библиотека создания Word не загрузилась (проверьте соединение или блокировщик рекламы) — подробности в консоли (F12).",
+    msg_select_pdf_or_image: "Выберите файл PDF или изображение для конвертации в Word.",
+    msg_no_text_found: "Не удалось распознать текст в этом файле. Попробуйте более чёткое и хорошо освещённое фото.",
+    msg_generating_word: "⏳ Создание файла Word...",
+    msg_scanning: "⏳ Обработка сканирования...",
+    msg_scan_success: "✅ Документ отсканирован! Выберите действие и нажмите «Обработать и Скачать».",
+    msg_scan_error_prefix: "❌ Ошибка сканирования: ",
+    msg_ocr_preparing: "⏳ Подготовка OCR...",
+    msg_ocr_page: "⏳ OCR на странице {i} из {n}...",
+  },
+  zh: {
+    title: "万能转换器 Pro | PDF转Word和图片",
+    nav_tool: "工具", nav_info: "关于与常见问题", nav_privacy: "隐私",
+    h1: "万能转换器 Pro",
+    lbl_select_file: "1. 选择文件：",
+    lbl_camera: "📷 或使用相机扫描文档：",
+    chk_scanner: "应用扫描效果（黑白，更高对比度）",
+    lbl_action: "2. 操作：",
+    opt_word: "PDF/照片转Word（.docx）",
+    opt_image: "转换图片/PDF（PNG/JPG/WebP）",
+    lbl_ocr_lang: "文本语言（用于照片/扫描件的OCR）：",
+    lbl_width: "宽度（像素）", lbl_height: "高度（像素）", lbl_angle: "旋转（度）",
+    btn_process: "处理并下载",
+    faq_title: "常见问题（FAQ）",
+    faq_q1: "如何运作？", faq_a1: "一切都在您的计算机上本地处理。您的文件永远不会发送到任何服务器。",
+    faq_q2: "是收费的吗？", faq_a2: "不，这些工具是免费提供的。",
+    about_title: "关于本项目", about_text: "旨在简化文档转换而开发。",
+    privacy_title: "隐私政策",
+    privacy_text: "本网站尊重您的隐私。我们不会收集或存储您的文件。我们使用Google AdSense广告，可能会收集基本浏览数据（Cookie）以展示相关广告。",
+    msg_select_file_alert: "请选择一个文件！",
+    msg_processing: "⏳ 处理中...",
+    msg_success: "✅ 成功！",
+    msg_error_prefix: "❌ 错误：",
+    msg_word_lib_missing: "Word生成库加载失败（请检查网络连接或广告拦截器）— 详情请查看控制台（F12）。",
+    msg_select_pdf_or_image: "请选择一个PDF文件或图片以转换为Word。",
+    msg_no_text_found: "无法识别此文件中的任何文本。请尝试更清晰、光线更好的照片。",
+    msg_generating_word: "⏳ 正在生成Word文件...",
+    msg_scanning: "⏳ 正在处理扫描...",
+    msg_scan_success: "✅ 文档已扫描！选择操作并点击「处理并下载」。",
+    msg_scan_error_prefix: "❌ 扫描错误：",
+    msg_ocr_preparing: "⏳ 正在准备OCR...",
+    msg_ocr_page: "⏳ 正在识别第{i}页，共{n}页...",
+  },
+  ja: {
+    title: "ユニバーサルコンバーター Pro | PDFをWordと画像に変換",
+    nav_tool: "ツール", nav_info: "概要とFAQ", nav_privacy: "プライバシー",
+    h1: "ユニバーサルコンバーター Pro",
+    lbl_select_file: "1. ファイルを選択：",
+    lbl_camera: "📷 またはカメラで書類をスキャン：",
+    chk_scanner: "スキャナー効果を適用（白黒、コントラスト強調）",
+    lbl_action: "2. アクション：",
+    opt_word: "PDF/写真をWordに（.docx）",
+    opt_image: "画像/PDFを変換（PNG/JPG/WebP）",
+    lbl_ocr_lang: "テキスト言語（写真・スキャンのOCR用）：",
+    lbl_width: "幅（px）", lbl_height: "高さ（px）", lbl_angle: "回転（度）",
+    btn_process: "処理してダウンロード",
+    faq_title: "よくある質問（FAQ）",
+    faq_q1: "仕組みは？", faq_a1: "すべてお使いのコンピューター上でローカルに処理されます。ファイルがサーバーに送信されることはありません。",
+    faq_q2: "有料ですか？", faq_a2: "いいえ、これらのツールは無料で提供されています。",
+    about_title: "プロジェクトについて", about_text: "文書変換を簡単にするために開発されました。",
+    privacy_title: "プライバシーポリシー",
+    privacy_text: "当サイトはお客様のプライバシーを尊重します。ファイルを収集・保存することはありません。関連性の高い広告を表示するため、基本的な閲覧データ（Cookie）を収集する可能性があるGoogle AdSense広告を使用しています。",
+    msg_select_file_alert: "ファイルを選択してください！",
+    msg_processing: "⏳ 処理中...",
+    msg_success: "✅ 成功！",
+    msg_error_prefix: "❌ エラー：",
+    msg_word_lib_missing: "Word生成ライブラリの読み込みに失敗しました（接続または広告ブロッカーを確認してください）— 詳細はコンソール（F12）を確認してください。",
+    msg_select_pdf_or_image: "Wordに変換するPDFファイルまたは画像を選択してください。",
+    msg_no_text_found: "このファイルからテキストを認識できませんでした。より鮮明で明るい写真をお試しください。",
+    msg_generating_word: "⏳ Wordファイルを生成中...",
+    msg_scanning: "⏳ スキャンを処理中...",
+    msg_scan_success: "✅ 書類をスキャンしました！アクションを選び「処理してダウンロード」をクリックしてください。",
+    msg_scan_error_prefix: "❌ スキャンエラー：",
+    msg_ocr_preparing: "⏳ OCRを準備中...",
+    msg_ocr_page: "⏳ {n}ページ中{i}ページ目をOCR中...",
+  },
+  ko: {
+    title: "유니버설 컨버터 Pro | PDF를 Word와 이미지로",
+    nav_tool: "도구", nav_info: "소개 & FAQ", nav_privacy: "개인정보",
+    h1: "유니버설 컨버터 Pro",
+    lbl_select_file: "1. 파일을 선택하세요:",
+    lbl_camera: "📷 또는 카메라로 문서를 스캔하세요:",
+    chk_scanner: "스캐너 효과 적용 (흑백, 대비 강화)",
+    lbl_action: "2. 작업:",
+    opt_word: "PDF/사진을 Word로 (.docx)",
+    opt_image: "이미지/PDF 변환 (PNG/JPG/WebP)",
+    lbl_ocr_lang: "텍스트 언어 (사진/스캔 OCR용):",
+    lbl_width: "너비 (px)", lbl_height: "높이 (px)", lbl_angle: "회전 (도)",
+    btn_process: "처리 및 다운로드",
+    faq_title: "자주 묻는 질문 (FAQ)",
+    faq_q1: "어떻게 작동하나요?", faq_a1: "모든 처리는 사용자의 컴퓨터에서 로컬로 이루어집니다. 파일이 서버로 전송되지 않습니다.",
+    faq_q2: "유료인가요?", faq_a2: "아니요, 이 도구들은 무료로 제공됩니다.",
+    about_title: "프로젝트 소개", about_text: "문서 변환을 쉽게 하기 위해 개발되었습니다.",
+    privacy_title: "개인정보 처리방침",
+    privacy_text: "이 사이트는 귀하의 개인정보를 존중합니다. 파일을 수집하거나 저장하지 않습니다. 관련성 높은 광고를 표시하기 위해 기본 탐색 데이터(쿠키)를 수집할 수 있는 Google 애드센스 광고를 사용합니다.",
+    msg_select_file_alert: "파일을 선택하세요!",
+    msg_processing: "⏳ 처리 중...",
+    msg_success: "✅ 성공!",
+    msg_error_prefix: "❌ 오류: ",
+    msg_word_lib_missing: "Word 생성 라이브러리를 불러오지 못했습니다 (연결 또는 광고 차단기를 확인하세요) — 자세한 내용은 콘솔(F12)을 확인하세요.",
+    msg_select_pdf_or_image: "Word로 변환할 PDF 파일이나 이미지를 선택하세요.",
+    msg_no_text_found: "이 파일에서 텍스트를 인식할 수 없습니다. 더 선명하고 밝은 사진을 시도해 보세요.",
+    msg_generating_word: "⏳ Word 파일 생성 중...",
+    msg_scanning: "⏳ 스캔 처리 중...",
+    msg_scan_success: "✅ 문서가 스캔되었습니다! 작업을 선택하고 '처리 및 다운로드'를 클릭하세요.",
+    msg_scan_error_prefix: "❌ 스캔 오류: ",
+    msg_ocr_preparing: "⏳ OCR 준비 중...",
+    msg_ocr_page: "⏳ {n}페이지 중 {i}페이지 OCR 중...",
+  },
+  ar: {
+    title: "المحوّل الشامل برو | من PDF إلى Word والصور",
+    nav_tool: "الأداة", nav_info: "حول والأسئلة الشائعة", nav_privacy: "الخصوصية",
+    h1: "المحوّل الشامل برو",
+    lbl_select_file: "١. اختر الملف:",
+    lbl_camera: "📷 أو امسح مستنداً ضوئياً بالكاميرا:",
+    chk_scanner: "تطبيق تأثير الماسح الضوئي (أبيض وأسود، تباين أعلى)",
+    lbl_action: "٢. الإجراء:",
+    opt_word: "PDF/صورة إلى Word (.docx)",
+    opt_image: "تحويل صورة/PDF (PNG/JPG/WebP)",
+    lbl_ocr_lang: "لغة النص (للتعرف الضوئي على الصور/المستندات الممسوحة):",
+    lbl_width: "العرض (بكسل)", lbl_height: "الارتفاع (بكسل)", lbl_angle: "التدوير (درجات)",
+    btn_process: "معالجة وتنزيل",
+    faq_title: "الأسئلة الشائعة",
+    faq_q1: "كيف يعمل؟", faq_a1: "تتم معالجة كل شيء محلياً على جهازك. لا تُرسل ملفاتك أبداً إلى أي خادم.",
+    faq_q2: "هل هو مدفوع؟", faq_a2: "لا، هذه الأدوات مجانية.",
+    about_title: "حول المشروع", about_text: "تم تطويره لتسهيل تحويل المستندات.",
+    privacy_title: "سياسة الخصوصية",
+    privacy_text: "يحترم هذا الموقع خصوصيتك. نحن لا نجمع أو نخزن ملفاتك. نستخدم إعلانات Google AdSense التي قد تجمع بيانات تصفح أساسية (ملفات تعريف الارتباط) لعرض إعلانات ذات صلة.",
+    msg_select_file_alert: "اختر ملفاً!",
+    msg_processing: "⏳ جارٍ المعالجة...",
+    msg_success: "✅ تم بنجاح!",
+    msg_error_prefix: "❌ خطأ: ",
+    msg_word_lib_missing: "فشل تحميل مكتبة إنشاء Word (تحقق من اتصالك أو مانع الإعلانات) — راجع وحدة التحكم (F12) للتفاصيل.",
+    msg_select_pdf_or_image: "اختر ملف PDF أو صورة لتحويله إلى Word.",
+    msg_no_text_found: "تعذر التعرف على أي نص في هذا الملف. جرّب صورة أوضح وأفضل إضاءة.",
+    msg_generating_word: "⏳ جارٍ إنشاء ملف Word...",
+    msg_scanning: "⏳ جارٍ معالجة المسح الضوئي...",
+    msg_scan_success: "✅ تم مسح المستند ضوئياً! اختر الإجراء وانقر على «معالجة وتنزيل».",
+    msg_scan_error_prefix: "❌ خطأ في المسح الضوئي: ",
+    msg_ocr_preparing: "⏳ جارٍ تجهيز التعرف الضوئي...",
+    msg_ocr_page: "⏳ جارٍ التعرف الضوئي على الصفحة {i} من {n}...",
+  },
+  hi: {
+    title: "यूनिवर्सल कन्वर्टर प्रो | PDF को Word और छवियों में बदलें",
+    nav_tool: "टूल", nav_info: "जानकारी और सामान्य प्रश्न", nav_privacy: "गोपनीयता",
+    h1: "यूनिवर्सल कन्वर्टर प्रो",
+    lbl_select_file: "1. फ़ाइल चुनें:",
+    lbl_camera: "📷 या कैमरे से दस्तावेज़ स्कैन करें:",
+    chk_scanner: "स्कैनर प्रभाव लागू करें (काला-सफ़ेद, अधिक कंट्रास्ट)",
+    lbl_action: "2. क्रिया:",
+    opt_word: "PDF/फोटो को Word में (.docx)",
+    opt_image: "छवि/PDF बदलें (PNG/JPG/WebP)",
+    lbl_ocr_lang: "टेक्स्ट की भाषा (फोटो/स्कैन के OCR के लिए):",
+    lbl_width: "चौड़ाई (px)", lbl_height: "ऊंचाई (px)", lbl_angle: "घुमाएं (डिग्री)",
+    btn_process: "प्रोसेस करें और डाउनलोड करें",
+    faq_title: "सामान्य प्रश्न (FAQ)",
+    faq_q1: "यह कैसे काम करता है?", faq_a1: "सब कुछ आपके कंप्यूटर पर स्थानीय रूप से प्रोसेस होता है। आपकी फ़ाइलें कभी किसी सर्वर पर नहीं भेजी जातीं।",
+    faq_q2: "क्या यह भुगतान वाला है?", faq_a2: "नहीं, ये टूल मुफ़्त में उपलब्ध हैं।",
+    about_title: "प्रोजेक्ट के बारे में", about_text: "दस्तावेज़ रूपांतरण को आसान बनाने के लिए विकसित किया गया।",
+    privacy_title: "गोपनीयता नीति",
+    privacy_text: "यह साइट आपकी गोपनीयता का सम्मान करती है। हम आपकी फ़ाइलें एकत्र या संग्रहीत नहीं करते। हम Google AdSense विज्ञापनों का उपयोग करते हैं, जो प्रासंगिक विज्ञापन दिखाने के लिए बुनियादी ब्राउज़िंग डेटा (कुकीज़) एकत्र कर सकते हैं।",
+    msg_select_file_alert: "एक फ़ाइल चुनें!",
+    msg_processing: "⏳ प्रोसेस हो रहा है...",
+    msg_success: "✅ सफल!",
+    msg_error_prefix: "❌ त्रुटि: ",
+    msg_word_lib_missing: "Word जनरेशन लाइब्रेरी लोड नहीं हो सकी (अपना कनेक्शन या ऐड ब्लॉकर जांचें) — विवरण के लिए कंसोल (F12) देखें।",
+    msg_select_pdf_or_image: "Word में बदलने के लिए एक PDF फ़ाइल या छवि चुनें।",
+    msg_no_text_found: "इस फ़ाइल में कोई टेक्स्ट पहचाना नहीं जा सका। एक अधिक स्पष्ट और बेहतर रोशनी वाली फोटो आज़माएं।",
+    msg_generating_word: "⏳ Word फ़ाइल बनाई जा रही है...",
+    msg_scanning: "⏳ स्कैन प्रोसेस हो रहा है...",
+    msg_scan_success: "✅ दस्तावेज़ स्कैन हो गया! क्रिया चुनें और 'प्रोसेस करें और डाउनलोड करें' पर क्लिक करें।",
+    msg_scan_error_prefix: "❌ स्कैन करने में त्रुटि: ",
+    msg_ocr_preparing: "⏳ OCR तैयार किया जा रहा है...",
+    msg_ocr_page: "⏳ पेज {i} / {n} पर OCR हो रहा है...",
+  },
+  nl: {
+    title: "Universele Converter Pro | PDF naar Word en Afbeeldingen",
+    nav_tool: "Tool", nav_info: "Over & FAQ", nav_privacy: "Privacy",
+    h1: "Universele Converter Pro",
+    lbl_select_file: "1. Selecteer het bestand:",
+    lbl_camera: "📷 Of scan een document met de camera:",
+    chk_scanner: "Scannereffect toepassen (zwart-wit, meer contrast)",
+    lbl_action: "2. Actie:",
+    opt_word: "PDF/Foto naar Word (.docx)",
+    opt_image: "Afbeelding/PDF converteren (PNG/JPG/WebP)",
+    lbl_ocr_lang: "Taal van de tekst (voor OCR van foto's/scans):",
+    lbl_width: "Breedte (px)", lbl_height: "Hoogte (px)", lbl_angle: "Draaien (graden)",
+    btn_process: "Verwerken en Downloaden",
+    faq_title: "Veelgestelde Vragen (FAQ)",
+    faq_q1: "Hoe werkt het?", faq_a1: "Alles wordt lokaal op uw computer verwerkt. Uw bestanden worden nooit naar een server verzonden.",
+    faq_q2: "Is het betaald?", faq_a2: "Nee, deze tools worden gratis aangeboden.",
+    about_title: "Over het Project", about_text: "Ontwikkeld om documentconversie te vereenvoudigen.",
+    privacy_title: "Privacybeleid",
+    privacy_text: "Deze site respecteert uw privacy. Wij verzamelen of bewaren uw bestanden niet. Wij gebruiken Google AdSense-advertenties, die basisbrowsegegevens (cookies) kunnen verzamelen om relevante advertenties te tonen.",
+    msg_select_file_alert: "Selecteer een bestand!",
+    msg_processing: "⏳ Verwerken...",
+    msg_success: "✅ Gelukt!",
+    msg_error_prefix: "❌ Fout: ",
+    msg_word_lib_missing: "De Word-generatiebibliotheek kon niet worden geladen (controleer uw verbinding of advertentieblokkering) — zie console (F12) voor details.",
+    msg_select_pdf_or_image: "Selecteer een PDF-bestand of een afbeelding om naar Word te converteren.",
+    msg_no_text_found: "Geen tekst herkend in dit bestand. Probeer een scherpere, beter belichte foto.",
+    msg_generating_word: "⏳ Word-bestand genereren...",
+    msg_scanning: "⏳ Scan verwerken...",
+    msg_scan_success: "✅ Document gescand! Kies de actie en klik op 'Verwerken en Downloaden'.",
+    msg_scan_error_prefix: "❌ Fout bij scannen: ",
+    msg_ocr_preparing: "⏳ OCR voorbereiden...",
+    msg_ocr_page: "⏳ OCR op pagina {i} van {n}...",
+  },
+  pl: {
+    title: "Uniwersalny Konwerter Pro | PDF na Word i obrazy",
+    nav_tool: "Narzędzie", nav_info: "O nas i FAQ", nav_privacy: "Prywatność",
+    h1: "Uniwersalny Konwerter Pro",
+    lbl_select_file: "1. Wybierz plik:",
+    lbl_camera: "📷 Lub zeskanuj dokument aparatem:",
+    chk_scanner: "Zastosuj efekt skanera (czarno-biały, większy kontrast)",
+    lbl_action: "2. Akcja:",
+    opt_word: "PDF/Zdjęcie na Word (.docx)",
+    opt_image: "Konwertuj obraz/PDF (PNG/JPG/WebP)",
+    lbl_ocr_lang: "Język tekstu (do OCR zdjęć/skanów):",
+    lbl_width: "Szerokość (px)", lbl_height: "Wysokość (px)", lbl_angle: "Obrót (stopnie)",
+    btn_process: "Przetwórz i Pobierz",
+    faq_title: "Najczęściej Zadawane Pytania (FAQ)",
+    faq_q1: "Jak to działa?", faq_a1: "Wszystko jest przetwarzane lokalnie na Twoim komputerze. Twoje pliki nigdy nie są wysyłane na żaden serwer.",
+    faq_q2: "Czy to płatne?", faq_a2: "Nie, te narzędzia są oferowane bezpłatnie.",
+    about_title: "O Projekcie", about_text: "Stworzone, aby ułatwić konwersję dokumentów.",
+    privacy_title: "Polityka Prywatności",
+    privacy_text: "Ta strona szanuje Twoją prywatność. Nie zbieramy ani nie przechowujemy Twoich plików. Korzystamy z reklam Google AdSense, które mogą zbierać podstawowe dane przeglądania (cookies) w celu wyświetlania odpowiednich reklam.",
+    msg_select_file_alert: "Wybierz plik!",
+    msg_processing: "⏳ Przetwarzanie...",
+    msg_success: "✅ Sukces!",
+    msg_error_prefix: "❌ Błąd: ",
+    msg_word_lib_missing: "Nie udało się załadować biblioteki generowania Word (sprawdź połączenie lub bloker reklam) — szczegóły w konsoli (F12).",
+    msg_select_pdf_or_image: "Wybierz plik PDF lub obraz do konwersji na Word.",
+    msg_no_text_found: "Nie rozpoznano żadnego tekstu w tym pliku. Spróbuj wyraźniejszego, lepiej oświetlonego zdjęcia.",
+    msg_generating_word: "⏳ Generowanie pliku Word...",
+    msg_scanning: "⏳ Przetwarzanie skanu...",
+    msg_scan_success: "✅ Dokument zeskanowany! Wybierz akcję i kliknij „Przetwórz i Pobierz”.",
+    msg_scan_error_prefix: "❌ Błąd skanowania: ",
+    msg_ocr_preparing: "⏳ Przygotowywanie OCR...",
+    msg_ocr_page: "⏳ OCR na stronie {i} z {n}...",
+  },
+  tr: {
+    title: "Evrensel Dönüştürücü Pro | PDF'den Word ve Görsellere",
+    nav_tool: "Araç", nav_info: "Hakkında ve SSS", nav_privacy: "Gizlilik",
+    h1: "Evrensel Dönüştürücü Pro",
+    lbl_select_file: "1. Dosyayı seçin:",
+    lbl_camera: "📷 Ya da kamerayla bir belge tarayın:",
+    chk_scanner: "Tarayıcı efekti uygula (siyah-beyaz, daha fazla kontrast)",
+    lbl_action: "2. İşlem:",
+    opt_word: "PDF/Fotoğraf'tan Word'e (.docx)",
+    opt_image: "Görsel/PDF Dönüştür (PNG/JPG/WebP)",
+    lbl_ocr_lang: "Metin dili (fotoğraf/tarama OCR'ı için):",
+    lbl_width: "Genişlik (px)", lbl_height: "Yükseklik (px)", lbl_angle: "Döndür (derece)",
+    btn_process: "İşle ve İndir",
+    faq_title: "Sıkça Sorulan Sorular (SSS)",
+    faq_q1: "Nasıl çalışır?", faq_a1: "Her şey bilgisayarınızda yerel olarak işlenir. Dosyalarınız asla bir sunucuya gönderilmez.",
+    faq_q2: "Ücretli mi?", faq_a2: "Hayır, bu araçlar ücretsiz olarak sunulmaktadır.",
+    about_title: "Proje Hakkında", about_text: "Belge dönüştürmeyi kolaylaştırmak için geliştirildi.",
+    privacy_title: "Gizlilik Politikası",
+    privacy_text: "Bu site gizliliğinize saygı duyar. Dosyalarınızı toplamıyor veya saklamıyoruz. İlgili reklamlar göstermek için temel tarama verilerini (çerezler) toplayabilecek Google AdSense reklamları kullanıyoruz.",
+    msg_select_file_alert: "Bir dosya seçin!",
+    msg_processing: "⏳ İşleniyor...",
+    msg_success: "✅ Başarılı!",
+    msg_error_prefix: "❌ Hata: ",
+    msg_word_lib_missing: "Word oluşturma kütüphanesi yüklenemedi (bağlantınızı veya reklam engelleyicinizi kontrol edin) — ayrıntılar için konsolu (F12) kontrol edin.",
+    msg_select_pdf_or_image: "Word'e dönüştürmek için bir PDF dosyası veya görsel seçin.",
+    msg_no_text_found: "Bu dosyada hiçbir metin tanınamadı. Daha net, iyi aydınlatılmış bir fotoğraf deneyin.",
+    msg_generating_word: "⏳ Word dosyası oluşturuluyor...",
+    msg_scanning: "⏳ Tarama işleniyor...",
+    msg_scan_success: "✅ Belge tarandı! İşlemi seçin ve 'İşle ve İndir'e tıklayın.",
+    msg_scan_error_prefix: "❌ Tarama hatası: ",
+    msg_ocr_preparing: "⏳ OCR hazırlanıyor...",
+    msg_ocr_page: "⏳ {n} sayfadan {i}. sayfada OCR yapılıyor...",
+  },
+  id: {
+    title: "Konverter Universal Pro | PDF ke Word dan Gambar",
+    nav_tool: "Alat", nav_info: "Tentang & FAQ", nav_privacy: "Privasi",
+    h1: "Konverter Universal Pro",
+    lbl_select_file: "1. Pilih file:",
+    lbl_camera: "📷 Atau pindai dokumen dengan kamera:",
+    chk_scanner: "Terapkan efek pemindai (hitam putih, kontras lebih tinggi)",
+    lbl_action: "2. Tindakan:",
+    opt_word: "PDF/Foto ke Word (.docx)",
+    opt_image: "Konversi Gambar/PDF (PNG/JPG/WebP)",
+    lbl_ocr_lang: "Bahasa teks (untuk OCR foto/pindaian):",
+    lbl_width: "Lebar (px)", lbl_height: "Tinggi (px)", lbl_angle: "Putar (derajat)",
+    btn_process: "Proses dan Unduh",
+    faq_title: "Pertanyaan yang Sering Diajukan (FAQ)",
+    faq_q1: "Bagaimana cara kerjanya?", faq_a1: "Semua diproses secara lokal di komputer Anda. File Anda tidak pernah dikirim ke server mana pun.",
+    faq_q2: "Apakah berbayar?", faq_a2: "Tidak, alat-alat ini disediakan secara gratis.",
+    about_title: "Tentang Proyek", about_text: "Dikembangkan untuk mempermudah konversi dokumen.",
+    privacy_title: "Kebijakan Privasi",
+    privacy_text: "Situs ini menghormati privasi Anda. Kami tidak mengumpulkan atau menyimpan file Anda. Kami menggunakan iklan Google AdSense, yang dapat mengumpulkan data penelusuran dasar (cookie) untuk menampilkan iklan yang relevan.",
+    msg_select_file_alert: "Pilih file!",
+    msg_processing: "⏳ Memproses...",
+    msg_success: "✅ Berhasil!",
+    msg_error_prefix: "❌ Kesalahan: ",
+    msg_word_lib_missing: "Pustaka pembuatan Word gagal dimuat (periksa koneksi atau pemblokir iklan Anda) — lihat konsol (F12) untuk detail.",
+    msg_select_pdf_or_image: "Pilih file PDF atau gambar untuk dikonversi ke Word.",
+    msg_no_text_found: "Tidak ada teks yang dapat dikenali dalam file ini. Coba foto yang lebih tajam dan lebih terang.",
+    msg_generating_word: "⏳ Membuat file Word...",
+    msg_scanning: "⏳ Memproses pemindaian...",
+    msg_scan_success: "✅ Dokumen dipindai! Pilih tindakan dan klik 'Proses dan Unduh'.",
+    msg_scan_error_prefix: "❌ Kesalahan saat memindai: ",
+    msg_ocr_preparing: "⏳ Menyiapkan OCR...",
+    msg_ocr_page: "⏳ OCR pada halaman {i} dari {n}...",
+  },
+  vi: {
+    title: "Trình Chuyển Đổi Vạn Năng Pro | PDF sang Word và Hình ảnh",
+    nav_tool: "Công cụ", nav_info: "Giới thiệu & FAQ", nav_privacy: "Quyền riêng tư",
+    h1: "Trình Chuyển Đổi Vạn Năng Pro",
+    lbl_select_file: "1. Chọn tệp:",
+    lbl_camera: "📷 Hoặc quét tài liệu bằng camera:",
+    chk_scanner: "Áp dụng hiệu ứng máy quét (đen trắng, tương phản cao hơn)",
+    lbl_action: "2. Hành động:",
+    opt_word: "PDF/Ảnh sang Word (.docx)",
+    opt_image: "Chuyển đổi Ảnh/PDF (PNG/JPG/WebP)",
+    lbl_ocr_lang: "Ngôn ngữ văn bản (cho OCR ảnh/bản quét):",
+    lbl_width: "Chiều rộng (px)", lbl_height: "Chiều cao (px)", lbl_angle: "Xoay (độ)",
+    btn_process: "Xử lý và Tải xuống",
+    faq_title: "Câu Hỏi Thường Gặp (FAQ)",
+    faq_q1: "Hoạt động như thế nào?", faq_a1: "Mọi thứ được xử lý cục bộ trên máy tính của bạn. Tệp của bạn không bao giờ được gửi đến bất kỳ máy chủ nào.",
+    faq_q2: "Có mất phí không?", faq_a2: "Không, các công cụ này được cung cấp miễn phí.",
+    about_title: "Về Dự Án", about_text: "Được phát triển để giúp việc chuyển đổi tài liệu dễ dàng hơn.",
+    privacy_title: "Chính Sách Quyền Riêng Tư",
+    privacy_text: "Trang này tôn trọng quyền riêng tư của bạn. Chúng tôi không thu thập hoặc lưu trữ tệp của bạn. Chúng tôi sử dụng quảng cáo Google AdSense, có thể thu thập dữ liệu duyệt web cơ bản (cookie) để hiển thị quảng cáo phù hợp.",
+    msg_select_file_alert: "Hãy chọn một tệp!",
+    msg_processing: "⏳ Đang xử lý...",
+    msg_success: "✅ Thành công!",
+    msg_error_prefix: "❌ Lỗi: ",
+    msg_word_lib_missing: "Không thể tải thư viện tạo Word (kiểm tra kết nối hoặc trình chặn quảng cáo) — xem console (F12) để biết chi tiết.",
+    msg_select_pdf_or_image: "Chọn tệp PDF hoặc hình ảnh để chuyển đổi sang Word.",
+    msg_no_text_found: "Không nhận dạng được văn bản nào trong tệp này. Hãy thử ảnh sắc nét và đủ sáng hơn.",
+    msg_generating_word: "⏳ Đang tạo tệp Word...",
+    msg_scanning: "⏳ Đang xử lý bản quét...",
+    msg_scan_success: "✅ Đã quét tài liệu! Chọn hành động và nhấp 'Xử lý và Tải xuống'.",
+    msg_scan_error_prefix: "❌ Lỗi khi quét: ",
+    msg_ocr_preparing: "⏳ Đang chuẩn bị OCR...",
+    msg_ocr_page: "⏳ OCR trang {i} trên {n}...",
+  },
+  sv: {
+    title: "Universal Converter Pro | PDF till Word och bilder",
+    nav_tool: "Verktyg", nav_info: "Om & FAQ", nav_privacy: "Integritet",
+    h1: "Universal Converter Pro",
+    lbl_select_file: "1. Välj filen:",
+    lbl_camera: "📷 Eller skanna ett dokument med kameran:",
+    chk_scanner: "Använd skannereffekt (svartvit, mer kontrast)",
+    lbl_action: "2. Åtgärd:",
+    opt_word: "PDF/Foto till Word (.docx)",
+    opt_image: "Konvertera bild/PDF (PNG/JPG/WebP)",
+    lbl_ocr_lang: "Textspråk (för OCR av foton/skanningar):",
+    lbl_width: "Bredd (px)", lbl_height: "Höjd (px)", lbl_angle: "Rotera (grader)",
+    btn_process: "Bearbeta och Ladda ner",
+    faq_title: "Vanliga Frågor (FAQ)",
+    faq_q1: "Hur fungerar det?", faq_a1: "Allt bearbetas lokalt på din dator. Dina filer skickas aldrig till någon server.",
+    faq_q2: "Är det betalt?", faq_a2: "Nej, dessa verktyg erbjuds gratis.",
+    about_title: "Om Projektet", about_text: "Utvecklat för att göra dokumentkonvertering enklare.",
+    privacy_title: "Integritetspolicy",
+    privacy_text: "Denna webbplats respekterar din integritet. Vi samlar inte in eller lagrar dina filer. Vi använder Google AdSense-annonser, som kan samla in grundläggande surfdata (cookies) för att visa relevanta annonser.",
+    msg_select_file_alert: "Välj en fil!",
+    msg_processing: "⏳ Bearbetar...",
+    msg_success: "✅ Klart!",
+    msg_error_prefix: "❌ Fel: ",
+    msg_word_lib_missing: "Word-genereringsbiblioteket kunde inte laddas (kontrollera din anslutning eller annonsblockerare) — se konsolen (F12) för detaljer.",
+    msg_select_pdf_or_image: "Välj en PDF-fil eller en bild att konvertera till Word.",
+    msg_no_text_found: "Ingen text kunde kännas igen i denna fil. Prova ett skarpare, bättre upplyst foto.",
+    msg_generating_word: "⏳ Genererar Word-fil...",
+    msg_scanning: "⏳ Bearbetar skanning...",
+    msg_scan_success: "✅ Dokument skannat! Välj åtgärd och klicka på 'Bearbeta och Ladda ner'.",
+    msg_scan_error_prefix: "❌ Fel vid skanning: ",
+    msg_ocr_preparing: "⏳ Förbereder OCR...",
+    msg_ocr_page: "⏳ OCR på sida {i} av {n}...",
+  },
+  el: {
+    title: "Universal Converter Pro | PDF σε Word και Εικόνες",
+    nav_tool: "Εργαλείο", nav_info: "Σχετικά & Συχνές Ερωτήσεις", nav_privacy: "Απόρρητο",
+    h1: "Universal Converter Pro",
+    lbl_select_file: "1. Επιλέξτε το αρχείο:",
+    lbl_camera: "📷 Ή σαρώστε ένα έγγραφο με την κάμερα:",
+    chk_scanner: "Εφαρμογή εφέ σαρωτή (ασπρόμαυρο, περισσότερη αντίθεση)",
+    lbl_action: "2. Ενέργεια:",
+    opt_word: "PDF/Φωτογραφία σε Word (.docx)",
+    opt_image: "Μετατροπή Εικόνας/PDF (PNG/JPG/WebP)",
+    lbl_ocr_lang: "Γλώσσα κειμένου (για OCR φωτογραφιών/σαρώσεων):",
+    lbl_width: "Πλάτος (px)", lbl_height: "Ύψος (px)", lbl_angle: "Περιστροφή (μοίρες)",
+    btn_process: "Επεξεργασία και Λήψη",
+    faq_title: "Συχνές Ερωτήσεις (FAQ)",
+    faq_q1: "Πώς λειτουργεί;", faq_a1: "Όλα επεξεργάζονται τοπικά στον υπολογιστή σας. Τα αρχεία σας δεν αποστέλλονται ποτέ σε κανέναν διακομιστή.",
+    faq_q2: "Είναι επί πληρωμή;", faq_a2: "Όχι, αυτά τα εργαλεία προσφέρονται δωρεάν.",
+    about_title: "Σχετικά με το Έργο", about_text: "Αναπτύχθηκε για να διευκολύνει τη μετατροπή εγγράφων.",
+    privacy_title: "Πολιτική Απορρήτου",
+    privacy_text: "Αυτός ο ιστότοπος σέβεται το απόρρητό σας. Δεν συλλέγουμε ούτε αποθηκεύουμε τα αρχεία σας. Χρησιμοποιούμε διαφημίσεις Google AdSense, οι οποίες ενδέχεται να συλλέγουν βασικά δεδομένα περιήγησης (cookies) για την εμφάνιση σχετικών διαφημίσεων.",
+    msg_select_file_alert: "Επιλέξτε ένα αρχείο!",
+    msg_processing: "⏳ Επεξεργασία...",
+    msg_success: "✅ Επιτυχία!",
+    msg_error_prefix: "❌ Σφάλμα: ",
+    msg_word_lib_missing: "Η βιβλιοθήκη δημιουργίας Word δεν φορτώθηκε (ελέγξτε τη σύνδεσή σας ή τον αποκλειστή διαφημίσεων) — δείτε την κονσόλα (F12) για λεπτομέρειες.",
+    msg_select_pdf_or_image: "Επιλέξτε ένα αρχείο PDF ή μια εικόνα για μετατροπή σε Word.",
+    msg_no_text_found: "Δεν αναγνωρίστηκε κείμενο σε αυτό το αρχείο. Δοκιμάστε μια πιο ευκρινή, καλύτερα φωτισμένη φωτογραφία.",
+    msg_generating_word: "⏳ Δημιουργία αρχείου Word...",
+    msg_scanning: "⏳ Επεξεργασία σάρωσης...",
+    msg_scan_success: "✅ Το έγγραφο σαρώθηκε! Επιλέξτε την ενέργεια και κάντε κλικ στο 'Επεξεργασία και Λήψη'.",
+    msg_scan_error_prefix: "❌ Σφάλμα κατά τη σάρωση: ",
+    msg_ocr_preparing: "⏳ Προετοιμασία OCR...",
+    msg_ocr_page: "⏳ OCR στη σελίδα {i} από {n}...",
+  },
+  uk: {
+    title: "Універсальний Конвертер Pro | PDF у Word та зображення",
+    nav_tool: "Інструмент", nav_info: "Про нас та FAQ", nav_privacy: "Конфіденційність",
+    h1: "Універсальний Конвертер Pro",
+    lbl_select_file: "1. Виберіть файл:",
+    lbl_camera: "📷 Або відскануйте документ камерою:",
+    chk_scanner: "Застосувати ефект сканера (чорно-білий, більше контрасту)",
+    lbl_action: "2. Дія:",
+    opt_word: "PDF/Фото у Word (.docx)",
+    opt_image: "Конвертувати зображення/PDF (PNG/JPG/WebP)",
+    lbl_ocr_lang: "Мова тексту (для OCR фото/сканів):",
+    lbl_width: "Ширина (px)", lbl_height: "Висота (px)", lbl_angle: "Поворот (градуси)",
+    btn_process: "Обробити та Завантажити",
+    faq_title: "Часті Питання (FAQ)",
+    faq_q1: "Як це працює?", faq_a1: "Все обробляється локально на вашому комп'ютері. Ваші файли ніколи не надсилаються на жоден сервер.",
+    faq_q2: "Це платно?", faq_a2: "Ні, ці інструменти надаються безкоштовно.",
+    about_title: "Про Проєкт", about_text: "Розроблено для спрощення конвертації документів.",
+    privacy_title: "Політика Конфіденційності",
+    privacy_text: "Цей сайт поважає вашу конфіденційність. Ми не збираємо і не зберігаємо ваші файли. Ми використовуємо рекламу Google AdSense, яка може збирати базові дані перегляду (файли cookie) для показу релевантної реклами.",
+    msg_select_file_alert: "Виберіть файл!",
+    msg_processing: "⏳ Обробка...",
+    msg_success: "✅ Успішно!",
+    msg_error_prefix: "❌ Помилка: ",
+    msg_word_lib_missing: "Не вдалося завантажити бібліотеку створення Word (перевірте з'єднання або блокувальник реклами) — деталі в консолі (F12).",
+    msg_select_pdf_or_image: "Виберіть файл PDF або зображення для конвертації у Word.",
+    msg_no_text_found: "Не вдалося розпізнати текст у цьому файлі. Спробуйте чіткіше, краще освітлене фото.",
+    msg_generating_word: "⏳ Створення файлу Word...",
+    msg_scanning: "⏳ Обробка сканування...",
+    msg_scan_success: "✅ Документ відскановано! Виберіть дію та натисніть «Обробити та Завантажити».",
+    msg_scan_error_prefix: "❌ Помилка сканування: ",
+    msg_ocr_preparing: "⏳ Підготовка OCR...",
+    msg_ocr_page: "⏳ OCR на сторінці {i} з {n}...",
+  },
+  fa: {
+    title: "مبدل جامع Pro | PDF به Word و تصاویر",
+    nav_tool: "ابزار", nav_info: "درباره و سوالات متداول", nav_privacy: "حریم خصوصی",
+    h1: "مبدل جامع Pro",
+    lbl_select_file: "۱. فایل را انتخاب کنید:",
+    lbl_camera: "📷 یا سندی را با دوربین اسکن کنید:",
+    chk_scanner: "اعمال جلوه اسکنر (سیاه و سفید، کنتراست بیشتر)",
+    lbl_action: "۲. عملیات:",
+    opt_word: "PDF/عکس به Word (.docx)",
+    opt_image: "تبدیل تصویر/PDF (PNG/JPG/WebP)",
+    lbl_ocr_lang: "زبان متن (برای OCR عکس‌ها/اسکن‌ها):",
+    lbl_width: "عرض (px)", lbl_height: "ارتفاع (px)", lbl_angle: "چرخش (درجه)",
+    btn_process: "پردازش و دانلود",
+    faq_title: "سوالات متداول",
+    faq_q1: "چگونه کار می‌کند؟", faq_a1: "همه چیز به صورت محلی روی رایانه شما پردازش می‌شود. فایل‌های شما هرگز به هیچ سروری ارسال نمی‌شوند.",
+    faq_q2: "آیا پولی است؟", faq_a2: "خیر، این ابزارها به صورت رایگان ارائه می‌شوند.",
+    about_title: "درباره پروژه", about_text: "برای تسهیل تبدیل اسناد توسعه یافته است.",
+    privacy_title: "سیاست حریم خصوصی",
+    privacy_text: "این سایت به حریم خصوصی شما احترام می‌گذارد. ما فایل‌های شما را جمع‌آوری یا ذخیره نمی‌کنیم. ما از تبلیغات Google AdSense استفاده می‌کنیم که ممکن است داده‌های اولیه مرور (کوکی‌ها) را برای نمایش تبلیغات مرتبط جمع‌آوری کند.",
+    msg_select_file_alert: "یک فایل انتخاب کنید!",
+    msg_processing: "⏳ در حال پردازش...",
+    msg_success: "✅ موفقیت!",
+    msg_error_prefix: "❌ خطا: ",
+    msg_word_lib_missing: "کتابخانه ایجاد Word بارگذاری نشد (اتصال یا مسدودکننده تبلیغات خود را بررسی کنید) — برای جزئیات کنسول (F12) را ببینید.",
+    msg_select_pdf_or_image: "یک فایل PDF یا تصویر برای تبدیل به Word انتخاب کنید.",
+    msg_no_text_found: "هیچ متنی در این فایل تشخیص داده نشد. یک عکس واضح‌تر و با نور بهتر امتحان کنید.",
+    msg_generating_word: "⏳ در حال ایجاد فایل Word...",
+    msg_scanning: "⏳ در حال پردازش اسکن...",
+    msg_scan_success: "✅ سند اسکن شد! عملیات را انتخاب کرده و روی «پردازش و دانلود» کلیک کنید.",
+    msg_scan_error_prefix: "❌ خطا در اسکن: ",
+    msg_ocr_preparing: "⏳ در حال آماده‌سازی OCR...",
+    msg_ocr_page: "⏳ OCR صفحه {i} از {n}...",
+  },
+  he: {
+    title: "ממיר אוניברסלי Pro | PDF ל-Word ותמונות",
+    nav_tool: "כלי", nav_info: "אודות ושאלות נפוצות", nav_privacy: "פרטיות",
+    h1: "ממיר אוניברסלי Pro",
+    lbl_select_file: "1. בחר קובץ:",
+    lbl_camera: "📷 או סרוק מסמך עם המצלמה:",
+    chk_scanner: "החל אפקט סורק (שחור-לבן, ניגודיות גבוהה יותר)",
+    lbl_action: "2. פעולה:",
+    opt_word: "PDF/תמונה ל-Word (.docx)",
+    opt_image: "המר תמונה/PDF (PNG/JPG/WebP)",
+    lbl_ocr_lang: "שפת הטקסט (עבור OCR של תמונות/סריקות):",
+    lbl_width: "רוחב (px)", lbl_height: "גובה (px)", lbl_angle: "סיבוב (מעלות)",
+    btn_process: "עבד והורד",
+    faq_title: "שאלות נפוצות",
+    faq_q1: "איך זה עובד?", faq_a1: "הכל מעובד באופן מקומי במחשב שלך. הקבצים שלך אף פעם לא נשלחים לשום שרת.",
+    faq_q2: "האם זה בתשלום?", faq_a2: "לא, כלים אלה מוצעים בחינם.",
+    about_title: "אודות הפרויקט", about_text: "פותח כדי להקל על המרת מסמכים.",
+    privacy_title: "מדיניות פרטיות",
+    privacy_text: "אתר זה מכבד את פרטיותך. איננו אוספים או שומרים את הקבצים שלך. אנו משתמשים בפרסומות Google AdSense, שעשויות לאסוף נתוני גלישה בסיסיים (עוגיות) כדי להציג מודעות רלוונטיות.",
+    msg_select_file_alert: "בחר קובץ!",
+    msg_processing: "⏳ מעבד...",
+    msg_success: "✅ הצלחה!",
+    msg_error_prefix: "❌ שגיאה: ",
+    msg_word_lib_missing: "טעינת ספריית יצירת ה-Word נכשלה (בדוק את החיבור שלך או את חוסם הפרסומות) — ראה מסוף (F12) לפרטים.",
+    msg_select_pdf_or_image: "בחר קובץ PDF או תמונה להמרה ל-Word.",
+    msg_no_text_found: "לא זוהה טקסט בקובץ זה. נסה תמונה חדה יותר ומוארת יותר.",
+    msg_generating_word: "⏳ יוצר קובץ Word...",
+    msg_scanning: "⏳ מעבד סריקה...",
+    msg_scan_success: "✅ המסמך נסרק! בחר פעולה ולחץ על 'עבד והורד'.",
+    msg_scan_error_prefix: "❌ שגיאה בסריקה: ",
+    msg_ocr_preparing: "⏳ מכין OCR...",
+    msg_ocr_page: "⏳ OCR בעמוד {i} מתוך {n}...",
+  },
+  th: {
+    title: "ตัวแปลงสากล Pro | PDF เป็น Word และรูปภาพ",
+    nav_tool: "เครื่องมือ", nav_info: "เกี่ยวกับ & คำถามที่พบบ่อย", nav_privacy: "ความเป็นส่วนตัว",
+    h1: "ตัวแปลงสากล Pro",
+    lbl_select_file: "1. เลือกไฟล์:",
+    lbl_camera: "📷 หรือสแกนเอกสารด้วยกล้อง:",
+    chk_scanner: "ใช้เอฟเฟกต์สแกนเนอร์ (ขาวดำ คอนทราสต์มากขึ้น)",
+    lbl_action: "2. การดำเนินการ:",
+    opt_word: "PDF/รูปภาพเป็น Word (.docx)",
+    opt_image: "แปลงรูปภาพ/PDF (PNG/JPG/WebP)",
+    lbl_ocr_lang: "ภาษาของข้อความ (สำหรับ OCR รูปภาพ/สแกน):",
+    lbl_width: "ความกว้าง (px)", lbl_height: "ความสูง (px)", lbl_angle: "หมุน (องศา)",
+    btn_process: "ประมวลผลและดาวน์โหลด",
+    faq_title: "คำถามที่พบบ่อย",
+    faq_q1: "ทำงานอย่างไร?", faq_a1: "ทุกอย่างประมวลผลในคอมพิวเตอร์ของคุณ ไฟล์ของคุณจะไม่ถูกส่งไปยังเซิร์ฟเวอร์ใดๆ",
+    faq_q2: "มีค่าใช้จ่ายหรือไม่?", faq_a2: "ไม่ เครื่องมือเหล่านี้ให้บริการฟรี",
+    about_title: "เกี่ยวกับโปรเจกต์", about_text: "พัฒนาขึ้นเพื่อให้การแปลงเอกสารง่ายขึ้น",
+    privacy_title: "นโยบายความเป็นส่วนตัว",
+    privacy_text: "เว็บไซต์นี้เคารพความเป็นส่วนตัวของคุณ เราไม่เก็บรวบรวมหรือจัดเก็บไฟล์ของคุณ เราใช้โฆษณา Google AdSense ซึ่งอาจเก็บข้อมูลการท่องเว็บพื้นฐาน (คุกกี้) เพื่อแสดงโฆษณาที่เกี่ยวข้อง",
+    msg_select_file_alert: "เลือกไฟล์!",
+    msg_processing: "⏳ กำลังประมวลผล...",
+    msg_success: "✅ สำเร็จ!",
+    msg_error_prefix: "❌ ข้อผิดพลาด: ",
+    msg_word_lib_missing: "โหลดไลบรารีสร้าง Word ไม่สำเร็จ (ตรวจสอบการเชื่อมต่อหรือตัวบล็อกโฆษณา) — ดูรายละเอียดในคอนโซล (F12)",
+    msg_select_pdf_or_image: "เลือกไฟล์ PDF หรือรูปภาพเพื่อแปลงเป็น Word",
+    msg_no_text_found: "ไม่สามารถจดจำข้อความในไฟล์นี้ได้ ลองใช้ภาพที่คมชัดและมีแสงดีกว่านี้",
+    msg_generating_word: "⏳ กำลังสร้างไฟล์ Word...",
+    msg_scanning: "⏳ กำลังประมวลผลการสแกน...",
+    msg_scan_success: "✅ สแกนเอกสารแล้ว! เลือกการดำเนินการแล้วคลิก 'ประมวลผลและดาวน์โหลด'",
+    msg_scan_error_prefix: "❌ ข้อผิดพลาดในการสแกน: ",
+    msg_ocr_preparing: "⏳ กำลังเตรียม OCR...",
+    msg_ocr_page: "⏳ OCR หน้า {i} จาก {n}...",
+  },
+  ro: {
+    title: "Convertor Universal Pro | PDF în Word și Imagini",
+    nav_tool: "Instrument", nav_info: "Despre & FAQ", nav_privacy: "Confidențialitate",
+    h1: "Convertor Universal Pro",
+    lbl_select_file: "1. Selectați fișierul:",
+    lbl_camera: "📷 Sau scanați un document cu camera:",
+    chk_scanner: "Aplicați efect de scaner (alb-negru, mai mult contrast)",
+    lbl_action: "2. Acțiune:",
+    opt_word: "PDF/Foto în Word (.docx)",
+    opt_image: "Convertiți Imagine/PDF (PNG/JPG/WebP)",
+    lbl_ocr_lang: "Limba textului (pentru OCR de fotografii/scanări):",
+    lbl_width: "Lățime (px)", lbl_height: "Înălțime (px)", lbl_angle: "Rotire (grade)",
+    btn_process: "Procesează și Descarcă",
+    faq_title: "Întrebări Frecvente (FAQ)",
+    faq_q1: "Cum funcționează?", faq_a1: "Totul este procesat local pe computerul dvs. Fișierele dvs. nu sunt niciodată trimise către niciun server.",
+    faq_q2: "Este cu plată?", faq_a2: "Nu, aceste instrumente sunt oferite gratuit.",
+    about_title: "Despre Proiect", about_text: "Dezvoltat pentru a facilita conversia documentelor.",
+    privacy_title: "Politica de Confidențialitate",
+    privacy_text: "Acest site respectă confidențialitatea dvs. Nu colectăm și nu stocăm fișierele dvs. Folosim reclame Google AdSense, care pot colecta date de navigare de bază (cookie-uri) pentru a afișa reclame relevante.",
+    msg_select_file_alert: "Selectați un fișier!",
+    msg_processing: "⏳ Se procesează...",
+    msg_success: "✅ Succes!",
+    msg_error_prefix: "❌ Eroare: ",
+    msg_word_lib_missing: "Biblioteca de generare Word nu s-a putut încărca (verificați conexiunea sau blocantul de reclame) — vedeți consola (F12) pentru detalii.",
+    msg_select_pdf_or_image: "Selectați un fișier PDF sau o imagine pentru a converti în Word.",
+    msg_no_text_found: "Nu s-a putut recunoaște niciun text în acest fișier. Încercați o fotografie mai clară și mai bine luminată.",
+    msg_generating_word: "⏳ Se generează fișierul Word...",
+    msg_scanning: "⏳ Se procesează scanarea...",
+    msg_scan_success: "✅ Document scanat! Alegeți acțiunea și faceți clic pe „Procesează și Descarcă”.",
+    msg_scan_error_prefix: "❌ Eroare la scanare: ",
+    msg_ocr_preparing: "⏳ Se pregătește OCR...",
+    msg_ocr_page: "⏳ OCR la pagina {i} din {n}...",
+  },
+  cs: {
+    title: "Univerzální Konvertor Pro | PDF do Wordu a obrázků",
+    nav_tool: "Nástroj", nav_info: "O nás a FAQ", nav_privacy: "Soukromí",
+    h1: "Univerzální Konvertor Pro",
+    lbl_select_file: "1. Vyberte soubor:",
+    lbl_camera: "📷 Nebo naskenujte dokument fotoaparátem:",
+    chk_scanner: "Použít efekt skeneru (černobílý, vyšší kontrast)",
+    lbl_action: "2. Akce:",
+    opt_word: "PDF/Foto do Wordu (.docx)",
+    opt_image: "Převést obrázek/PDF (PNG/JPG/WebP)",
+    lbl_ocr_lang: "Jazyk textu (pro OCR fotek/skenů):",
+    lbl_width: "Šířka (px)", lbl_height: "Výška (px)", lbl_angle: "Otočit (stupně)",
+    btn_process: "Zpracovat a Stáhnout",
+    faq_title: "Často Kladené Otázky (FAQ)",
+    faq_q1: "Jak to funguje?", faq_a1: "Vše se zpracovává lokálně ve vašem počítači. Vaše soubory nejsou nikdy odesílány na žádný server.",
+    faq_q2: "Je to placené?", faq_a2: "Ne, tyto nástroje jsou nabízeny zdarma.",
+    about_title: "O Projektu", about_text: "Vyvinuto pro usnadnění převodu dokumentů.",
+    privacy_title: "Zásady Ochrany Soukromí",
+    privacy_text: "Tento web respektuje vaše soukromí. Neshromažďujeme ani neukládáme vaše soubory. Používáme reklamy Google AdSense, které mohou shromažďovat základní data o prohlížení (cookies) pro zobrazení relevantních reklam.",
+    msg_select_file_alert: "Vyberte soubor!",
+    msg_processing: "⏳ Zpracovává se...",
+    msg_success: "✅ Úspěch!",
+    msg_error_prefix: "❌ Chyba: ",
+    msg_word_lib_missing: "Knihovnu pro generování Wordu se nepodařilo načíst (zkontrolujte připojení nebo blokátor reklam) — podrobnosti viz konzole (F12).",
+    msg_select_pdf_or_image: "Vyberte soubor PDF nebo obrázek pro převod do Wordu.",
+    msg_no_text_found: "V tomto souboru nebyl rozpoznán žádný text. Zkuste ostřejší, lépe osvětlenou fotku.",
+    msg_generating_word: "⏳ Generuje se soubor Word...",
+    msg_scanning: "⏳ Zpracovává se sken...",
+    msg_scan_success: "✅ Dokument naskenován! Vyberte akci a klikněte na „Zpracovat a Stáhnout“.",
+    msg_scan_error_prefix: "❌ Chyba při skenování: ",
+    msg_ocr_preparing: "⏳ Připravuje se OCR...",
+    msg_ocr_page: "⏳ OCR na stránce {i} z {n}...",
+  },
+  bn: {
+    title: "ইউনিভার্সাল কনভার্টার প্রো | PDF থেকে Word এবং ছবি",
+    nav_tool: "টুল", nav_info: "সম্পর্কে ও সাধারণ প্রশ্ন", nav_privacy: "গোপনীয়তা",
+    h1: "ইউনিভার্সাল কনভার্টার প্রো",
+    lbl_select_file: "১. ফাইল নির্বাচন করুন:",
+    lbl_camera: "📷 অথবা ক্যামেরা দিয়ে একটি নথি স্ক্যান করুন:",
+    chk_scanner: "স্ক্যানার এফেক্ট প্রয়োগ করুন (সাদাকালো, বেশি কনট্রাস্ট)",
+    lbl_action: "২. কাজ:",
+    opt_word: "PDF/ছবি থেকে Word (.docx)",
+    opt_image: "ছবি/PDF রূপান্তর করুন (PNG/JPG/WebP)",
+    lbl_ocr_lang: "পাঠ্যের ভাষা (ছবি/স্ক্যানের OCR-এর জন্য):",
+    lbl_width: "প্রস্থ (px)", lbl_height: "উচ্চতা (px)", lbl_angle: "ঘোরান (ডিগ্রি)",
+    btn_process: "প্রক্রিয়া করুন ও ডাউনলোড করুন",
+    faq_title: "সাধারণ প্রশ্নাবলী",
+    faq_q1: "এটি কীভাবে কাজ করে?", faq_a1: "সবকিছু আপনার কম্পিউটারে স্থানীয়ভাবে প্রক্রিয়া করা হয়। আপনার ফাইল কখনো কোনো সার্ভারে পাঠানো হয় না।",
+    faq_q2: "এটি কি পেইড?", faq_a2: "না, এই টুলগুলো বিনামূল্যে দেওয়া হয়।",
+    about_title: "প্রকল্প সম্পর্কে", about_text: "নথি রূপান্তর সহজ করার জন্য তৈরি করা হয়েছে।",
+    privacy_title: "গোপনীয়তা নীতি",
+    privacy_text: "এই সাইট আপনার গোপনীয়তাকে সম্মান করে। আমরা আপনার ফাইল সংগ্রহ বা সংরক্ষণ করি না। আমরা Google AdSense বিজ্ঞাপন ব্যবহার করি, যা প্রাসঙ্গিক বিজ্ঞাপন দেখানোর জন্য মৌলিক ব্রাউজিং ডেটা (কুকিজ) সংগ্রহ করতে পারে।",
+    msg_select_file_alert: "একটি ফাইল নির্বাচন করুন!",
+    msg_processing: "⏳ প্রক্রিয়াকরণ চলছে...",
+    msg_success: "✅ সফল!",
+    msg_error_prefix: "❌ ত্রুটি: ",
+    msg_word_lib_missing: "Word তৈরির লাইব্রেরি লোড হয়নি (আপনার সংযোগ বা বিজ্ঞাপন ব্লকার পরীক্ষা করুন) — বিস্তারিত জানতে কনসোল (F12) দেখুন।",
+    msg_select_pdf_or_image: "Word এ রূপান্তর করতে একটি PDF ফাইল বা ছবি নির্বাচন করুন।",
+    msg_no_text_found: "এই ফাইলে কোনো টেক্সট শনাক্ত করা যায়নি। আরও স্পষ্ট, ভালো আলোযুক্ত ছবি চেষ্টা করুন।",
+    msg_generating_word: "⏳ Word ফাইল তৈরি হচ্ছে...",
+    msg_scanning: "⏳ স্ক্যান প্রক্রিয়া চলছে...",
+    msg_scan_success: "✅ নথি স্ক্যান করা হয়েছে! কাজ নির্বাচন করে 'প্রক্রিয়া করুন ও ডাউনলোড করুন'-এ ক্লিক করুন।",
+    msg_scan_error_prefix: "❌ স্ক্যান করতে ত্রুটি: ",
+    msg_ocr_preparing: "⏳ OCR প্রস্তুত হচ্ছে...",
+    msg_ocr_page: "⏳ {n} পৃষ্ঠার মধ্যে {i} পৃষ্ঠায় OCR হচ্ছে...",
+  },
+  fil: {
+    title: "Universal Converter Pro | PDF sa Word at mga Larawan",
+    nav_tool: "Kasangkapan", nav_info: "Tungkol at FAQ", nav_privacy: "Privacy",
+    h1: "Universal Converter Pro",
+    lbl_select_file: "1. Piliin ang file:",
+    lbl_camera: "📷 O mag-scan ng dokumento gamit ang camera:",
+    chk_scanner: "Ilapat ang epekto ng scanner (itim at puti, mas maraming contrast)",
+    lbl_action: "2. Aksyon:",
+    opt_word: "PDF/Larawan sa Word (.docx)",
+    opt_image: "I-convert ang Larawan/PDF (PNG/JPG/WebP)",
+    lbl_ocr_lang: "Wika ng teksto (para sa OCR ng mga larawan/scan):",
+    lbl_width: "Lapad (px)", lbl_height: "Taas (px)", lbl_angle: "Ikutin (degrees)",
+    btn_process: "Iproseso at I-download",
+    faq_title: "Mga Madalas Itanong (FAQ)",
+    faq_q1: "Paano ito gumagana?", faq_a1: "Lahat ay pinoproseso nang lokal sa iyong computer. Ang iyong mga file ay hindi kailanman ipinapadala sa anumang server.",
+    faq_q2: "Bayad ba ito?", faq_a2: "Hindi, libre ang mga kasangkapang ito.",
+    about_title: "Tungkol sa Proyekto", about_text: "Binuo upang mapadali ang pag-convert ng dokumento.",
+    privacy_title: "Patakaran sa Privacy",
+    privacy_text: "Iginagalang ng site na ito ang iyong privacy. Hindi namin kinokolekta o iniimbak ang iyong mga file. Gumagamit kami ng mga ad ng Google AdSense, na maaaring mangolekta ng pangunahing data sa pag-browse (cookies) upang magpakita ng mga kaugnay na ad.",
+    msg_select_file_alert: "Pumili ng file!",
+    msg_processing: "⏳ Pinoproseso...",
+    msg_success: "✅ Tagumpay!",
+    msg_error_prefix: "❌ Error: ",
+    msg_word_lib_missing: "Hindi na-load ang Word generation library (suriin ang koneksyon o ad blocker) — tingnan ang console (F12) para sa detalye.",
+    msg_select_pdf_or_image: "Pumili ng PDF file o larawan na i-convert sa Word.",
+    msg_no_text_found: "Walang nakilalang text sa file na ito. Subukan ang mas malinaw, mas maliwanag na larawan.",
+    msg_generating_word: "⏳ Ginagawa ang Word file...",
+    msg_scanning: "⏳ Pinoproseso ang scan...",
+    msg_scan_success: "✅ Na-scan ang dokumento! Piliin ang aksyon at i-click ang 'Iproseso at I-download'.",
+    msg_scan_error_prefix: "❌ Error sa pag-scan: ",
+    msg_ocr_preparing: "⏳ Inihahanda ang OCR...",
+    msg_ocr_page: "⏳ OCR sa pahina {i} ng {n}...",
+  },
+};
+
+const RTL_LANGS = ["ar", "he", "fa"];
+let currentLang = "pt";
+
+function t(key, vars) {
+  const dict = TRANSLATIONS[currentLang] || TRANSLATIONS.pt;
+  let str = dict[key] || TRANSLATIONS.pt[key] || key;
+  if (vars) {
+    Object.keys(vars).forEach(k => { str = str.replace(`{${k}}`, vars[k]); });
+  }
+  return str;
+}
+
+function applyTranslations(lang) {
+  currentLang = TRANSLATIONS[lang] ? lang : "pt";
+  document.getElementById("htmlRoot").lang = currentLang;
+  document.getElementById("htmlRoot").dir = RTL_LANGS.includes(currentLang) ? "rtl" : "ltr";
+  document.getElementById("pageTitle").textContent = t("title");
+
+  document.querySelectorAll("[data-i18n]").forEach(el => {
+    el.textContent = t(el.getAttribute("data-i18n"));
+  });
+  document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
+    el.placeholder = t(el.getAttribute("data-i18n-placeholder"));
+  });
+
+  const sel = document.getElementById("langSelect");
+  if (sel.value !== currentLang) sel.value = currentLang;
+}
+
+function detectarIdiomaInicial() {
+  const supported = Object.keys(TRANSLATIONS);
+  const browserLang = (navigator.language || "pt").slice(0, 2).toLowerCase();
+  return supported.includes(browserLang) ? browserLang : "en";
+}
+
+document.getElementById("langSelect").addEventListener("change", (e) => {
+  applyTranslations(e.target.value);
+});
+
+applyTranslations(detectarIdiomaInicial());
+
+/* ================================================================ */
+/* Lógica principal (idêntica à anterior, usando t() nas mensagens)  */
+/* ================================================================ */
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+function showTab(id) {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+}
+
+document.getElementById('actionSelect').onchange = (e) => {
+    const isImage = e.target.value === 'image';
+    document.getElementById('imageSettings').style.display = isImage ? 'block' : 'none';
+    document.getElementById('ocrSettings').style.display = isImage ? 'none' : 'block';
+};
+
+document.getElementById('cameraInput').onchange = async (e) => {
+    const file = e.target.files[0];
+    const status = document.getElementById('status');
+    if (!file) return;
+    status.innerText = t("msg_scanning");
+    try {
+        const finalFile = document.getElementById('enhanceScan').checked
+            ? await applyScanEffect(file)
+            : file;
+
+        const dt = new DataTransfer();
+        dt.items.add(finalFile);
+        document.getElementById('fileInput').files = dt.files;
+
+        status.innerText = t("msg_scan_success");
+    } catch (err) {
+        status.innerText = t("msg_scan_error_prefix") + err.message;
+    }
+};
+
+async function applyScanEffect(file) {
+    const img = new Image();
+    img.src = URL.createObjectURL(file);
+    await img.decode();
+
+    const canvas = document.createElement('canvas');
+    canvas.width = img.width;
+    canvas.height = img.height;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0);
+
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const d = imageData.data;
+    const contrast = 1.4;
+    for (let i = 0; i < d.length; i += 4) {
+        const gray = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+        let v = (gray - 128) * contrast + 128;
+        v = Math.min(255, Math.max(0, v));
+        d[i] = d[i + 1] = d[i + 2] = v;
+    }
+    ctx.putImageData(imageData, 0, 0);
+
+    return new Promise((resolve, reject) => {
+        canvas.toBlob((blob) => {
+            if (!blob) return reject(new Error("scan blob failed"));
+            resolve(new File([blob], "documento_digitalizado.jpg", { type: "image/jpeg" }));
+        }, "image/jpeg", 0.92);
+    });
+}
+
+async function ocrImage(file, status) {
+    const lang = document.getElementById('ocrLang').value;
+    status.innerText = t("msg_ocr_preparing");
+    const worker = await Tesseract.createWorker(lang, 1, {
+        logger: m => {
+            if (m.progress != null) {
+                status.innerText = `⏳ OCR (${m.status}): ${Math.round(m.progress * 100)}%`;
+            }
+        }
+    });
+    const { data: { text } } = await worker.recognize(file);
+    await worker.terminate();
+    return text;
+}
+
+async function ocrPdf(pdf, status) {
+    const lang = document.getElementById('ocrLang').value;
+    const worker = await Tesseract.createWorker(lang, 1, {
+        logger: m => {
+            if (m.progress != null) {
+                status.innerText = `⏳ OCR (${m.status}): ${Math.round(m.progress * 100)}%`;
+            }
+        }
+    });
+    let text = "";
+    for (let i = 1; i <= pdf.numPages; i++) {
+        status.innerText = t("msg_ocr_page", { i, n: pdf.numPages });
+        const page = await pdf.getPage(i);
+        const vp = page.getViewport({ scale: 2.5 });
+        const canvas = document.createElement('canvas');
+        canvas.width = vp.width;
+        canvas.height = vp.height;
+        await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
+        const { data: { text: pageText } } = await worker.recognize(canvas);
+        text += pageText + "\n";
+    }
+    await worker.terminate();
+    return text;
+}
+
+document.getElementById('execBtn').onclick = async () => {
+    const file = document.getElementById('fileInput').files[0];
+    const action = document.getElementById('actionSelect').value;
+    const status = document.getElementById('status');
+    if (!file) return alert(t("msg_select_file_alert"));
+    status.innerText = t("msg_processing");
+
+    try {
+        if (action === 'word') {
+            if (typeof docx === 'undefined') {
+                throw new Error(t("msg_word_lib_missing"));
+            }
+
+            let fullText = "";
+
+            if (file.type === 'application/pdf') {
+                const pdf = await pdfjsLib.getDocument({data: await file.arrayBuffer()}).promise;
+
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    const txt = await (await pdf.getPage(i)).getTextContent();
+                    fullText += txt.items.map(s => s.str).join(" ") + "\n";
+                }
+
+                if (!fullText.trim()) {
+                    fullText = await ocrPdf(pdf, status);
+                }
+            } else if (file.type.startsWith('image/')) {
+                fullText = await ocrImage(file, status);
+            } else {
+                throw new Error(t("msg_select_pdf_or_image"));
+            }
+
+            if (!fullText.trim()) {
+                throw new Error(t("msg_no_text_found"));
+            }
+
+            status.innerText = t("msg_generating_word");
+            const paragraphs = fullText.split("\n").map(line => new docx.Paragraph(line));
+            const doc = new docx.Document({ sections: [{ children: paragraphs }] });
+            const blob = await docx.Packer.toBlob(doc);
+            await download(blob, "convertido.docx");
+        } else {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const w_in = parseInt(document.getElementById('width').value);
+            const h_in = parseInt(document.getElementById('height').value);
+            const angle = parseInt(document.getElementById('angle').value) || 0;
+            const fmt = document.getElementById('fmt').value;
+
+            if (file.type === 'application/pdf') {
+                const pdf = await pdfjsLib.getDocument({data: await file.arrayBuffer()}).promise;
+                const page = await pdf.getPage(1);
+                const vp = page.getViewport({scale: 2.0});
+                canvas.width = w_in || vp.width;
+                canvas.height = h_in || vp.height;
+                await page.render({canvasContext: ctx, viewport: vp.clone({scale: (w_in || vp.width)/vp.width})}).promise;
+            } else {
+                const img = new Image();
+                img.src = URL.createObjectURL(file);
+                await img.decode();
+                canvas.width = w_in || img.width;
+                canvas.height = h_in || img.height;
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            }
+
+            if (angle !== 0) {
+                const finalCanvas = document.createElement('canvas');
+                finalCanvas.width = (angle === 90 || angle === 270) ? canvas.height : canvas.width;
+                finalCanvas.height = (angle === 90 || angle === 270) ? canvas.width : canvas.height;
+                const fCtx = finalCanvas.getContext('2d');
+                fCtx.translate(finalCanvas.width/2, finalCanvas.height/2);
+                fCtx.rotate(angle * Math.PI / 180);
+                fCtx.drawImage(canvas, -canvas.width/2, -canvas.height/2);
+                await download(finalCanvas.toDataURL('image/'+fmt), "convertido."+fmt);
+            } else {
+                await download(canvas.toDataURL('image/'+fmt), "convertido."+fmt);
+            }
+        }
+        status.innerText = t("msg_success");
+    } catch (e) {
+        console.error(e);
+        status.innerText = t("msg_error_prefix") + e.message;
+    }
+};
+
+/* ================================================================ */
+/* Gerador de QR Code                                                 */
+/* ================================================================ */
+const tipoConteudoEl = document.getElementById('tipoConteudo');
+if (tipoConteudoEl) {
+    const camposQr = {
+        texto: document.getElementById('campoTexto'),
+        wifi: document.getElementById('campoWifi'),
+        whatsapp: document.getElementById('campoWhatsapp'),
+    };
+
+    tipoConteudoEl.onchange = () => {
+        Object.values(camposQr).forEach(c => c.style.display = 'none');
+        camposQr[tipoConteudoEl.value].style.display = 'block';
+    };
+
+    function montarConteudoQr() {
+        const tipo = tipoConteudoEl.value;
+        if (tipo === 'texto') {
+            return document.getElementById('inputTexto').value.trim();
+        }
+        if (tipo === 'wifi') {
+            const nome = document.getElementById('wifiNome').value.trim();
+            const senha = document.getElementById('wifiSenha').value.trim();
+            const seg = document.getElementById('wifiTipo').value;
+            return `WIFI:T:${seg};S:${nome};P:${senha};;`;
+        }
+        if (tipo === 'whatsapp') {
+            const numero = document.getElementById('whatsappNumero').value.trim().replace(/\D/g, '');
+            const msg = document.getElementById('whatsappMensagem').value.trim();
+            return `https://wa.me/${numero}${msg ? '?text=' + encodeURIComponent(msg) : ''}`;
+        }
+        return '';
+    }
+
+    document.getElementById('gerarBtn').onclick = () => {
+        const conteudo = montarConteudoQr();
+        if (!conteudo) {
+            alert('Preencha os campos antes de gerar o QR Code!');
+            return;
+        }
+
+        const tamanho = parseInt(document.getElementById('tamanhoQr').value);
+        const qrDiv = document.getElementById('qrcode');
+        qrDiv.innerHTML = '';
+
+        new QRCode(qrDiv, {
+            text: conteudo,
+            width: tamanho,
+            height: tamanho,
+            correctLevel: QRCode.CorrectLevel.H,
+        });
+
+        document.getElementById('acoesQr').style.display = 'block';
+    };
+
+    document.getElementById('baixarBtn').onclick = async () => {
+        const qrDiv = document.getElementById('qrcode');
+        const img = qrDiv.querySelector('img');
+        const canvasQr = qrDiv.querySelector('canvas');
+
+        let blob;
+        if (canvasQr) {
+            blob = await new Promise(resolve => canvasQr.toBlob(resolve, 'image/png'));
+        } else if (img) {
+            const resp = await fetch(img.src);
+            blob = await resp.blob();
+        } else {
+            return;
+        }
+
+        await download(blob, 'qrcode.png');
+    };
+}
+
+// Imprime o arquivo selecionado (imagem ou PDF), abrindo a visualização
+// de impressão nativa do navegador.
+document.getElementById('btnImprimir').onclick = () => {
+    const file = document.getElementById('fileInput').files[0];
+    if (!file) { alert('Selecione um arquivo primeiro!'); return; }
+
+    const url = URL.createObjectURL(file);
+
+    if (file.type === 'application/pdf') {
+        // PDFs: abre no visualizador nativo do navegador, que já tem botão de imprimir
+        window.open(url, '_blank');
+    } else if (file.type.startsWith('image/')) {
+        // Imagens: abre uma janela simples só com a imagem e aciona a impressão
+        const janela = window.open('', '_blank');
+        janela.document.write(`
+            <html>
+            <head><title>Imprimir</title></head>
+            <body style="margin:0; display:flex; align-items:center; justify-content:center;">
+                <img src="${url}" style="max-width:100%; max-height:100vh;" onload="window.print()">
+            </body>
+            </html>
+        `);
+        janela.document.close();
+    } else {
+        alert('Formato não suportado para impressão direta.');
+    }
+};
+
+async function download(data, name) {
+    // Normaliza tudo para um Blob, independente se veio como data URL (string) ou Blob
+    let blob;
+    if (typeof data === 'string') {
+        const res = await fetch(data);
+        blob = await res.blob();
+    } else {
+        blob = data;
+    }
+
+    const arquivo = new File([blob], name, { type: blob.type });
+
+    // iPhone/iPad (Safari) e outros navegadores com suporte à Web Share API:
+    // usa o menu nativo de compartilhar/salvar, que é o único jeito confiável
+    // de baixar arquivo gerado por JS no iOS.
+    if (navigator.canShare && navigator.canShare({ files: [arquivo] })) {
+        try {
+            await navigator.share({ files: [arquivo], title: name });
+            return;
+        } catch (err) {
+            // Pessoa cancelou o compartilhamento ou algo falhou — cai no plano B abaixo
+        }
+    }
+
+    // Plano B (funciona bem em Android e computador): link de download tradicional
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = name;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    // Último recurso pra iOS antigo sem Web Share API: abre numa nova aba,
+    // de onde dá pra segurar o dedo na imagem e "Salvar em Fotos"
+    const ehIOS = /iP(hone|od|ad)/.test(navigator.userAgent);
+    if (ehIOS && !(navigator.canShare)) {
+        window.open(url, '_blank');
+    }
+}
+</script>
+
+<!-- ================================================================ -->
+<!-- Widget de chat com IA (atendimento automático, não mexe em arquivos) -->
+<!-- ================================================================ -->
+<style>
+  #ia-bubble {
+    position: fixed; bottom: 20px; right: 20px; width: 56px; height: 56px;
+    border-radius: 50%; background: #007bff; color: white; border: none;
+    font-size: 24px; cursor: pointer; box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+    z-index: 9999;
+  }
+  #ia-janela {
+    position: fixed; bottom: 90px; right: 20px; width: 320px; max-width: 90vw;
+    height: 420px; max-height: 70vh; background: white; border-radius: 14px;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.2); display: none; flex-direction: column;
+    overflow: hidden; z-index: 9999; font-family: sans-serif;
+  }
+  #ia-janela.aberta { display: flex; }
+  #ia-cabecalho {
+    background: #007bff; color: white; padding: 12px 16px; font-weight: bold;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  #ia-fechar { background: none; border: none; color: white; font-size: 18px; cursor: pointer; }
+  #ia-mensagens { flex: 1; overflow-y: auto; padding: 12px; font-size: 14px; }
+  .ia-msg { margin-bottom: 10px; padding: 8px 12px; border-radius: 10px; max-width: 85%; line-height: 1.4; }
+  .ia-msg.bot { background: #f0f2f5; align-self: flex-start; }
+  .ia-msg.user { background: #007bff; color: white; align-self: flex-end; margin-left: auto; }
+  #ia-input-area { display: flex; border-top: 1px solid #eee; padding: 8px; gap: 6px; }
+  #ia-input { flex: 1; border: 1px solid #ddd; border-radius: 8px; padding: 8px; font-size: 14px; margin: 0; }
+  #ia-enviar { width: auto; padding: 8px 14px; margin: 0; }
+</style>
+
+<button id="ia-bubble" title="Precisa de ajuda?">💬</button>
+<div id="ia-janela">
+  <div id="ia-cabecalho">
+    <span>Assistente ao Público (IA)</span>
+    <button id="ia-fechar">✕</button>
+  </div>
+  <div id="ia-mensagens"></div>
+  <div id="ia-input-area">
+    <input id="ia-input" type="text" placeholder="Digite sua dúvida...">
+    <button id="ia-enviar">Enviar</button>
+  </div>
+</div>
+
+<script>
+  const NOMES_IDIOMA_IA = {
+    pt: 'português', en: 'English', es: 'español', fr: 'français', de: 'alemão',
+    it: 'italiano', ru: 'russo', zh: 'chinês', ja: 'japonês', ko: 'coreano',
+    ar: 'árabe', hi: 'hindi', nl: 'holandês', pl: 'polonês', tr: 'turco',
+    id: 'indonésio', vi: 'vietnamita', sv: 'sueco', el: 'grego',
+    uk: 'ucraniano', fa: 'persa', he: 'hebraico', th: 'tailandês',
+    ro: 'romeno', cs: 'tcheco', bn: 'bengali', fil: 'filipino'
+  };
+
+  function montarPromptIA() {
+    const nomeIdioma = NOMES_IDIOMA_IA[currentLang] || 'português';
+    return "Você é o assistente virtual do Conversor Universal Pro, um site " +
+      "que converte PDF em Word, faz OCR de fotos/documentos escaneados e " +
+      "converte imagens (PNG/JPG/WebP). Tudo é processado localmente no " +
+      "navegador do usuário — nenhum arquivo é enviado a servidores. O uso " +
+      "inclui 3 dias de teste grátis; depois disso, a assinatura mensal " +
+      "custa R$ 1,00. Responda em " + nomeIdioma + ", de forma curta, clara " +
+      "e amigável, tirando dúvidas sobre como usar o site. Você NÃO tem " +
+      "acesso aos arquivos do usuário nem pode processá-los — apenas " +
+      "explique como usar a ferramenta.";
+  }
+
+  const iaBubble = document.getElementById('ia-bubble');
+  const iaJanela = document.getElementById('ia-janela');
+  const iaFechar = document.getElementById('ia-fechar');
+  const iaMensagens = document.getElementById('ia-mensagens');
+  const iaInput = document.getElementById('ia-input');
+  const iaEnviar = document.getElementById('ia-enviar');
+
+  let historicoChat = [];
+  let primeiraAbertura = true;
+
+  iaBubble.onclick = () => {
+    iaJanela.classList.toggle('aberta');
+    if (primeiraAbertura) {
+      adicionarMensagem('bot', 'Oi! Sou o assistente do site. Posso te ajudar a entender como converter PDF, fazer OCR de fotos ou converter imagens. Qual sua dúvida?');
+      primeiraAbertura = false;
+    }
+  };
+  iaFechar.onclick = () => iaJanela.classList.remove('aberta');
+
+  function adicionarMensagem(tipo, texto) {
+    const div = document.createElement('div');
+    div.className = 'ia-msg ' + tipo;
+    div.textContent = texto;
+    iaMensagens.appendChild(div);
+    iaMensagens.scrollTop = iaMensagens.scrollHeight;
+  }
+
+  function extrairTextoResposta(resposta) {
+    if (!resposta) return '';
+    if (typeof resposta === 'string') return resposta;
+
+    const conteudo = resposta?.message?.content;
+    if (typeof conteudo === 'string') return conteudo;
+    if (Array.isArray(conteudo)) {
+      return conteudo.map(bloco => bloco?.text || '').join(' ').trim();
+    }
+    if (typeof resposta.text === 'string') return resposta.text;
+
+    try { return String(resposta); } catch { return ''; }
+  }
+
+  async function enviarPergunta() {
+    const pergunta = iaInput.value.trim();
+    if (!pergunta) return;
+
+    adicionarMensagem('user', pergunta);
+    iaInput.value = '';
+    historicoChat.push({ role: 'user', content: pergunta });
+
+    adicionarMensagem('bot', '⏳ Pensando...');
+    const msgCarregando = iaMensagens.lastElementChild;
+
+    try {
+      const resposta = await puter.ai.chat(
+        [{ role: 'system', content: montarPromptIA() }, ...historicoChat],
+        { model: 'gpt-5.4-nano' }
+      );
+      const texto = extrairTextoResposta(resposta).trim() || 'Não consegui gerar uma resposta agora, tente reformular a pergunta.';
+      msgCarregando.textContent = texto;
+      historicoChat.push({ role: 'assistant', content: texto });
+    } catch (err) {
+      console.error(err);
+      msgCarregando.textContent = 'Desculpe, não consegui responder agora. Tente novamente em instantes.';
+    }
+  }
+
+  iaEnviar.onclick = enviarPergunta;
+  iaInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') enviarPergunta();
+  });
+</script>
+
+<script>
+  /* ============================================================ */
+  /* Sistema de assinatura (Pix + comprovante por e-mail + código)  */
+  /* ============================================================ */
+  const CONFIG_ASSINATURA = {
+    chavePix: "nandonascimento122@gmail.com",
+    seuEmail: "nandonascimento122@gmail.com",
+    valor: 1.00,
+    diasTesteGratis: 3,
+    senhaAdmin: "7",
+  };
+
+  const CHAVE_CODIGO_ATUAL_CONV = "conversor_codigo_atual";
+  function obterCodigoAtualConversor() {
+    return localStorage.getItem(CHAVE_CODIGO_ATUAL_CONV) || "SEM-CODIGO-DEFINIDO";
+  }
+
+  let codigoPixConversorTexto = "";
+
+  function registrarVisitaConversor() {
+    let total = parseInt(localStorage.getItem('conv_total') || '0');
+    const hoje = new Date().toDateString();
+    let hojeCont = localStorage.getItem('conv_data_hoje') === hoje ? parseInt(localStorage.getItem('conv_hoje') || '0') : 0;
+    if (!localStorage.getItem('conv_ja_visitou')) {
+      total++; hojeCont++;
+      localStorage.setItem('conv_ja_visitou', 'sim');
+      localStorage.setItem('conv_total', total);
+    }
+    localStorage.setItem('conv_hoje', hojeCont);
+    localStorage.setItem('conv_data_hoje', hoje);
+  }
+
+  function atualizarPainelAdminConversor() {
+    const total = parseInt(localStorage.getItem('conv_total') || '0');
+    const hoje = parseInt(localStorage.getItem('conv_hoje') || '0');
+    const testes = parseInt(localStorage.getItem('conv_testes') || '0');
+    const pagos = parseInt(localStorage.getItem('conv_pagos') || '0');
+
+    document.getElementById('contadorTotalConversor').textContent = total;
+    document.getElementById('contadorHojeConversor').textContent = hoje;
+    document.getElementById('contadorTestesConversor').textContent = testes;
+    document.getElementById('contadorPagosConversor').textContent = pagos;
+
+    renderizarGraficoAdminConversor({ total, hoje, testes, pagos });
+  }
+
+  let graficoAdminConversorInstancia = null;
+  function renderizarGraficoAdminConversor(dados) {
+    const ctx = document.getElementById('graficoAdminConversor');
+    if (graficoAdminConversorInstancia) graficoAdminConversorInstancia.destroy();
+    graficoAdminConversorInstancia = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['Total de visitas', 'Acessos hoje', 'Testes iniciados', 'Assinantes confirmados'],
+        datasets: [{
+          data: [dados.total, dados.hoje, dados.testes, dados.pagos],
+          backgroundColor: ['#007bff', '#17a2b8', '#ffc107', '#28a745'],
+          borderRadius: 6,
+        }],
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
+      },
+    });
+  }
+
+  function gerarCodigoPixConversor() {
+    const valor = CONFIG_ASSINATURA.valor.toFixed(2);
+    codigoPixConversorTexto = `00020126580014br.gov.bcb.pix0136${CONFIG_ASSINATURA.chavePix}0220Assinatura Conversor5204000053039865802BR5925Conversor Universal6009Brasil620705036304${valor.replace('.', '')}`;
+    document.getElementById('codigoPixConversor').textContent = codigoPixConversorTexto;
+
+    const qrDiv = document.getElementById('qrcodeConversor');
+    qrDiv.innerHTML = '';
+    new QRCode(qrDiv, {
+      text: codigoPixConversorTexto,
+      width: 180,
+      height: 180,
+      correctLevel: QRCode.CorrectLevel.H,
+    });
+  }
+
+  function montarLinkEmailConversor() {
+    const assunto = encodeURIComponent("Comprovante - Assinatura Conversor Universal Pro");
+    const corpo = encodeURIComponent(
+      "Olá! Segue em anexo o comprovante do meu pagamento de R$ 1,00 via Pix.\n\n" +
+      "Por favor, me envie o código de acesso.\n\n" +
+      "(Não esqueça de anexar o print/comprovante antes de enviar)"
+    );
+    document.getElementById('btnEmailComprovanteConversor').href =
+      `mailto:${CONFIG_ASSINATURA.seuEmail}?subject=${assunto}&body=${corpo}`;
+  }
+
+  function copiarCodigoPixConversor() {
+    navigator.clipboard.writeText(codigoPixConversorTexto)
+      .then(() => alert("✅ Código PIX copiado!"))
+      .catch(() => alert("❌ Copie manualmente o código acima."));
+  }
+
+  function confirmarCodigoConversor() {
+    const digitado = document.getElementById('campoCodigoConversor').value.trim().toUpperCase();
+    const msg = document.getElementById('msgCodigoConversor');
+    const codigoValido = obterCodigoAtualConversor().toUpperCase();
+
+    if (!digitado) {
+      msg.textContent = "Digite o código que você recebeu por e-mail.";
+      msg.className = "msg-codigo-conv erro";
+      return;
+    }
+
+    if (digitado === codigoValido && codigoValido !== "SEM-CODIGO-DEFINIDO") {
+      localStorage.setItem('conversor_assinante_desde', new Date().toISOString());
+      localStorage.setItem('conv_pagos', parseInt(localStorage.getItem('conv_pagos') || '0') + 1);
+      msg.textContent = "✅ Código correto! Liberando...";
+      msg.className = "msg-codigo-conv sucesso";
+      setTimeout(liberarAcessoConversor, 600);
+    } else {
+      msg.textContent = "❌ Código incorreto. Confira o e-mail que você recebeu.";
+      msg.className = "msg-codigo-conv erro";
+    }
+  }
+
+  function liberarAcessoConversor() {
+    document.getElementById('telaAssinaturaConversor').classList.add('oculta');
+  }
+
+  function verificarAcessoConversor() {
+    const assinante = localStorage.getItem('conversor_assinante_desde');
+    if (assinante) {
+      const diasPassados = (new Date() - new Date(assinante)) / (1000 * 60 * 60 * 24);
+      if (diasPassados < 30) { liberarAcessoConversor(); return; }
+    }
+
+    let inicioTeste = localStorage.getItem('conversor_teste_inicio');
+    if (!inicioTeste) {
+      inicioTeste = new Date().toISOString();
+      localStorage.setItem('conversor_teste_inicio', inicioTeste);
+      localStorage.setItem('conv_testes', parseInt(localStorage.getItem('conv_testes') || '0') + 1);
+    }
+    const diasTeste = (new Date() - new Date(inicioTeste)) / (1000 * 60 * 60 * 24);
+    if (diasTeste < CONFIG_ASSINATURA.diasTesteGratis) {
+      liberarAcessoConversor();
+    } else {
+      // Teste expirado e sem assinatura ativa: exibe a tela de pagamento
+      document.getElementById('telaAssinaturaConversor').classList.remove('oculta');
+    }
+  }
+
+  function abrirAdminConversor(e) {
+    e.preventDefault();
+    const senha = prompt("Senha do painel admin:");
+    if (senha !== CONFIG_ASSINATURA.senhaAdmin) {
+      alert("Senha incorreta.");
+      return;
+    }
+    document.getElementById('codigoAtualExibidoConversor').textContent = obterCodigoAtualConversor();
+    atualizarPainelAdminConversor();
+    document.getElementById('painelAdminConversor').classList.add('aberto');
+  }
+
+  function fecharAdminConversor() {
+    document.getElementById('painelAdminConversor').classList.remove('aberto');
+  }
+
+  function salvarNovoCodigoConversor() {
+    const novo = document.getElementById('novoCodigoInputConversor').value.trim().toUpperCase();
+    if (!novo) { alert("Digite um código antes de salvar."); return; }
+    localStorage.setItem(CHAVE_CODIGO_ATUAL_CONV, novo);
+    document.getElementById('codigoAtualExibidoConversor').textContent = novo;
+    document.getElementById('novoCodigoInputConversor').value = '';
+    alert("✅ Novo código salvo! Envie esse código por e-mail pra quem pagou.");
+  }
+
+  gerarCodigoPixConversor();
+  montarLinkEmailConversor();
+  registrarVisitaConversor();
+  verificarAcessoConversor();
+</script>
+</body>
+</html>
